@@ -1,0 +1,129 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 36 32% 95%;
+    --foreground: 20 14% 11%;
+    --card: 36 25% 99%;
+    --card-foreground: 20 14% 11%;
+    --popover: 36 25% 99%;
+    --popover-foreground: 20 14% 11%;
+
+    --primary: 32 45% 38%;
+    --primary-foreground: 40 38% 97%;
+    --primary-50: 36 60% 96%;
+    --primary-100: 34 55% 91%;
+    --primary-200: 33 50% 82%;
+    --primary-300: 32 48% 70%;
+    --primary-400: 32 46% 55%;
+    --primary-500: 32 45% 42%;
+    --primary-600: 30 48% 35%;
+    --primary-700: 28 50% 28%;
+    --primary-800: 26 52% 22%;
+    --primary-900: 24 55% 16%;
+
+    --secondary: 36 18% 91%;
+    --secondary-foreground: 20 14% 15%;
+    --muted: 36 18% 91%;
+    --muted-foreground: 25 8% 40%;
+    --accent: 36 22% 89%;
+    --accent-foreground: 20 14% 15%;
+
+    --destructive: 355 55% 40%;
+    --destructive-foreground: 40 38% 97%;
+    --success: 152 35% 30%;
+    --success-foreground: 40 38% 97%;
+    --warning: 36 65% 40%;
+    --warning-foreground: 40 38% 97%;
+
+    --border: 34 18% 83%;
+    --input: 34 18% 83%;
+    --ring: 32 45% 42%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 20 16% 7%;
+    --foreground: 36 30% 92%;
+    --card: 20 14% 10%;
+    --card-foreground: 36 30% 92%;
+    --popover: 20 14% 10%;
+    --popover-foreground: 36 30% 92%;
+
+    --primary: 34 55% 55%;
+    --primary-foreground: 20 16% 9%;
+    --primary-50: 34 40% 12%;
+    --primary-100: 34 42% 16%;
+    --primary-200: 34 44% 24%;
+    --primary-300: 33 46% 34%;
+    --primary-400: 33 50% 45%;
+    --primary-500: 34 55% 55%;
+    --primary-600: 35 60% 62%;
+    --primary-700: 36 65% 70%;
+    --primary-800: 37 68% 78%;
+    --primary-900: 38 70% 85%;
+
+    --secondary: 20 10% 15%;
+    --secondary-foreground: 36 30% 92%;
+    --muted: 20 10% 15%;
+    --muted-foreground: 30 10% 62%;
+    --accent: 20 10% 17%;
+    --accent-foreground: 36 30% 92%;
+
+    --destructive: 355 48% 48%;
+    --destructive-foreground: 36 30% 96%;
+    --success: 152 30% 45%;
+    --success-foreground: 20 16% 9%;
+    --warning: 36 60% 55%;
+    --warning-foreground: 20 16% 9%;
+
+    --border: 20 10% 18%;
+    --input: 20 10% 18%;
+    --ring: 34 55% 55%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body { @apply bg-background text-foreground font-sans antialiased; }
+  h1, h2, h3, h4, h5, h6 { @apply font-sans; letter-spacing: -0.01em; }
+  ::selection { @apply bg-primary/20 text-foreground; }
+}
+
+@layer components {
+  /* Editorial serif for shop-facing display type */
+  .font-editorial { font-family: 'Fraunces', 'Georgia', serif; font-feature-settings: 'liga' 1; }
+
+  .skeleton { @apply relative overflow-hidden bg-muted rounded-md; }
+  .skeleton::after {
+    @apply absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent;
+    content: ''; animation: shimmer 1.5s infinite;
+  }
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { @apply bg-muted-foreground/30 rounded-full; }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover { @apply bg-muted-foreground/50; }
+
+  /* Reusable premium primitives */
+  .surface-panel { @apply bg-card border border-border/70 rounded-xl shadow-[0_1px_2px_rgba(20,16,13,0.04),0_10px_28px_-12px_rgba(20,16,13,0.10)]; }
+  .surface-panel-hover { @apply transition-all duration-300 hover:shadow-[0_2px_8px_rgba(20,16,13,0.06),0_16px_36px_-14px_rgba(20,16,13,0.16)] hover:-translate-y-0.5; }
+  .eyebrow { @apply text-xs font-semibold uppercase tracking-[0.18em] text-primary; }
+  .divider-fade { @apply h-px w-full bg-gradient-to-r from-transparent via-border to-transparent; }
+  .bg-noise { position: relative; }
+  .bg-noise::before {
+    content: '';
+    position: absolute; inset: 0; pointer-events: none; opacity: 0.5;
+    background-image: radial-gradient(hsl(var(--foreground) / 0.035) 1px, transparent 1px);
+    background-size: 3px 3px;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in-up { animation: fade-in-up 0.6s cubic-bezier(0.16,1,0.3,1) both; }
+  .animate-scale-in { animation: scale-in 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+}
+
+@keyframes fade-in-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scale-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
