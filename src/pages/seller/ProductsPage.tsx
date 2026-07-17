@@ -147,8 +147,9 @@ export default function ProductsPage() {
       }
       setModalOpen(false);
       fetchProducts(page);
-    } catch {
-      toast.error(editing ? 'Failed to update product' : 'Failed to create product');
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { error?: string; message?: string } } };
+      toast.error(e.response?.data?.error || e.response?.data?.message || (editing ? 'Failed to update product' : 'Failed to create product'));
     } finally {
       setSaving(false);
     }

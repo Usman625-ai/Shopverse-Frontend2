@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { Mail, Lock, User, Store, Phone, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { Mail, Lock, User, Store, Phone, Eye, EyeOff, ShieldCheck, ArrowLeft, RefreshCw } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { register as registerAction, verifyEmail, clearError } from '../../store/authSlice';
 import { Button, Input, Field, Select } from '../../components/ui';
@@ -24,14 +24,15 @@ const schema = z.object({
 });
 type FormData = z.infer<typeof schema>;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface P { onBack?: () => void; onSwitchToLogin?: () => void; }
+const OTP_COOLDOWN = 60;
 
-export default function RegisterPage(_props: P) {
+export default function RegisterPage() {
   const [sp, setSp] = useState(false);
   const [step, setStep] = useState<'register' | 'otp'>('register');
   const [otp, setOtp] = useState('');
   const [email, setEmail] = useState('');
+  const [resending, setResending] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const dispatch = useAppDispatch();
   const { isLoading } = useAppSelector((s) => s.auth);
   const { register, handleSubmit, watch, formState: { errors } } = useForm<FormData>({
@@ -39,6 +40,16 @@ export default function RegisterPage(_props: P) {
     defaultValues: { role: 'CUSTOMER' },
   });
   const role = watch('role');
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (cooldown <= 0) {
+      if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+      return;
+    }
+    timerRef.current = setInterval(() => setCooldown((c) => c - 1), 1000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [cooldown]);
 
   const onSubmit = async (d: FormData) => {
     dispatch(clearError());
@@ -46,20 +57,36 @@ export default function RegisterPage(_props: P) {
       await dispatch(registerAction(d)).unwrap();
       setEmail(d.email);
       setStep('otp');
-      toast.success('Registration successful! Please verify your email.');
+      setCooldown(OTP_COOLDOWN);
+      toast.success('Registration initiated! Please verify your email with the OTP sent.');
     } catch (e) {
       toast.error(e as string);
     }
   };
 
   const handleVerify = async () => {
-    if (!otp || otp.length < 4) { toast.error('Please enter a valid OTP'); return; }
+    if (!otp || otp.length < 6) { toast.error('Please enter the 6-digit OTP'); return; }
     try {
       await dispatch(verifyEmail({ email, otp })).unwrap();
-      toast.success('Email verified! You can now login.');
-      window.location.href = '/login';
+      toast.success('Email verified! Welcome to ShopVerse.');
+      window.location.href = '/';
     } catch (e) {
       toast.error(e as string);
+    }
+  };
+
+  const handleResend = async () => {
+    if (cooldown > 0 || resending) return;
+    setResending(true);
+    try {
+      await api.post('/api/auth/resend-otp', null, { params: { email } });
+      toast.success('A new OTP has been sent to ' + email);
+      setCooldown(OTP_COOLDOWN);
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { error?: string } } };
+      toast.error(e.response?.data?.error || 'Failed to resend OTP');
+    } finally {
+      setResending(false);
     }
   };
 
@@ -73,31 +100,41 @@ export default function RegisterPage(_props: P) {
             </div>
             <h2 className="mt-4 font-editorial text-2xl font-medium tracking-tight">Verify Your Email</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              We've sent an OTP to <span className="font-medium text-foreground">{email}</span>
+              We've sent a 6-digit OTP to <span className="font-medium text-foreground">{email}</span>
             </p>
           </div>
           <div className="mt-6 space-y-4">
             <Input
               type="text"
-              placeholder="Enter OTP code"
+              placeholder="Enter 6-digit OTP"
               value={otp}
-              onChange={(e) => setOtp(e.target.value)}
+              onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
               className="text-center text-lg tracking-widest"
               maxLength={6}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleVerify(); }}
             />
             <Button onClick={handleVerify} className="w-full" loading={isLoading}>Verify Email</Button>
+            <div className="flex items-center justify-center gap-2 text-sm">
+              {cooldown > 0 ? (
+                <span className="text-muted-foreground">
+                  Resend OTP in <span className="font-medium text-foreground">{cooldown}s</span>
+                </span>
+              ) : (
+                <button
+                  onClick={handleResend}
+                  disabled={resending}
+                  className="flex items-center gap-1.5 font-medium text-primary hover:underline disabled:opacity-50"
+                >
+                  {resending ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                  Resend OTP
+                </button>
+              )}
+            </div>
             <button
-              onClick={async () => {
-                try {
-                  await api.post('/api/auth/resend-otp', null, { params: { email } });
-                  toast.success('OTP resent to ' + email);
-                } catch {
-                  toast.error('Failed to resend OTP');
-                }
-              }}
-              className="w-full text-sm text-primary hover:underline"
+              onClick={() => setStep('register')}
+              className="flex w-full items-center justify-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
             >
-              Resend OTP
+              <ArrowLeft className="h-3.5 w-3.5" /> Back to registration
             </button>
           </div>
         </div>
@@ -146,7 +183,7 @@ export default function RegisterPage(_props: P) {
               <div className="relative"><Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input placeholder="0311-1234567" className="pl-10" error={!!errors.contactNumber} {...register('contactNumber')} /></div>
             </Field>
-            <Button type="submit" className="w-full" loading={isLoading}>Create Account</Button>
+            <Button type="submit" className="w-full" loading={isLoading} disabled={isLoading}>Create Account</Button>
           </form>
           <p className="mt-6 text-center text-sm text-muted-foreground">
             Already have an account?{' '}

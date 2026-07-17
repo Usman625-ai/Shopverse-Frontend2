@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Store, Phone, FileText, Image as ImageIcon, Save, Upload, Loader2, Building2,
+  Store, Phone, FileText, Image as ImageIcon, Save, Upload, Loader2, Building2, RefreshCw,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../lib/api';
@@ -81,8 +81,35 @@ export default function SettingsPage() {
       });
       setSeller(res.data.data);
       toast.success('Shop profile updated');
-    } catch {
-      toast.error('Failed to update profile');
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { error?: string; message?: string } } };
+      toast.error(e.response?.data?.error || e.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleReapply = async () => {
+    if (!form.shopName) {
+      toast.error('Shop name is required to reapply');
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await api.post<ApiResponse<Seller>>('/api/seller/reapply', {
+        shopName: form.shopName,
+        shopDescription: form.shopDescription,
+        shopLogo: form.shopLogo,
+        shopBanner: form.shopBanner,
+        contactNumber: form.contactNumber,
+        gstNumber: form.gstNumber,
+        panNumber: form.panNumber,
+      });
+      setSeller(res.data.data);
+      toast.success('Reapplication submitted! An admin will review your profile.');
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { error?: string; message?: string } } };
+      toast.error(e.response?.data?.error || e.response?.data?.message || 'Failed to reapply');
     } finally {
       setSaving(false);
     }
@@ -135,11 +162,13 @@ export default function SettingsPage() {
             <CardContent className="flex items-center gap-3 p-4">
               <div className={cn(
                 'flex h-10 w-10 items-center justify-center rounded-lg',
-                seller.sellerStatus === 'APPROVED' ? 'bg-success/10' : 'bg-warning/10',
+                seller.sellerStatus === 'APPROVED' ? 'bg-success/10'
+                  : seller.sellerStatus === 'REJECTED' ? 'bg-destructive/10' : 'bg-warning/10',
               )}>
                 <Store className={cn(
                   'h-5 w-5',
-                  seller.sellerStatus === 'APPROVED' ? 'text-success' : 'text-warning',
+                  seller.sellerStatus === 'APPROVED' ? 'text-success'
+                    : seller.sellerStatus === 'REJECTED' ? 'text-destructive' : 'text-warning',
                 )} />
               </div>
               <div>
@@ -149,7 +178,9 @@ export default function SettingsPage() {
                     ? 'Your shop is active and visible to customers.'
                     : seller.sellerStatus === 'PENDING'
                     ? 'Your shop is awaiting approval.'
-                    : seller.rejectionReason || 'Contact support for more information.'}
+                    : seller.sellerStatus === 'REJECTED'
+                    ? (seller.rejectionReason ? `Rejected: ${seller.rejectionReason}` : 'Your application was rejected. Update your details and reapply.')
+                    : 'Contact support for more information.'}
                 </p>
               </div>
             </CardContent>
@@ -334,6 +365,11 @@ export default function SettingsPage() {
                 <Button onClick={handleSave} loading={saving}>
                   <Save className="h-4 w-4" /> Save Changes
                 </Button>
+                {seller?.sellerStatus === 'REJECTED' && (
+                  <Button onClick={handleReapply} loading={saving} variant="default" className="bg-success hover:bg-success/90">
+                    <RefreshCw className="h-4 w-4" /> Reapply
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>

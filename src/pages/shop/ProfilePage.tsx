@@ -94,6 +94,20 @@ export default function ProfilePage() {
     catch { toast.error('Failed to delete address'); }
   };
 
+  const handleRemovePhoto = async () => {
+    try {
+      await api.put('/api/customer/profile', { ...profileForm, profileImage: '' });
+      const updated = profile ? { ...profile, profileImage: '' } : profile;
+      setProfile(updated);
+      setProfileForm((f) => ({ ...f, profileImage: '' }));
+      if (updated) dispatch(setUser(updated));
+      toast.success('Profile photo removed');
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { error?: string } } };
+      toast.error(e.response?.data?.error || 'Failed to remove photo');
+    }
+  };
+
   const handlePhotoUpload = async (file: File) => {
     setUploadingPhoto(true);
     try {
@@ -132,6 +146,11 @@ export default function ProfilePage() {
               <label htmlFor="avatar-input" className="absolute bottom-0 right-0 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm transition-opacity hover:opacity-90" title="Change photo">
                 {uploadingPhoto ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Camera className="h-3.5 w-3.5" />}
               </label>
+              {profile?.profileImage && (
+                <button onClick={handleRemovePhoto} className="absolute -bottom-1 -left-1 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow-sm transition-opacity hover:opacity-90" title="Remove photo">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              )}
             </div>
             <div className="flex-1 text-center sm:text-left">
               <h2 className="font-editorial text-xl font-medium">{profile?.name}</h2>
@@ -231,3 +250,4 @@ export default function ProfilePage() {
     </div>
   );
 }
+

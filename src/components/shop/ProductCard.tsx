@@ -99,37 +99,37 @@ export default function ProductCard({ product, layout = 'grid', index = 0 }: Pro
       className="h-full"
     >
       <Link to={`/shop/product/${product.slug}`} className="group block h-full">
-        <div className="group relative flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-card shadow-luxury transition-all duration-300 hover:shadow-luxury-lg hover:-translate-y-1">
-          <div className="relative aspect-square overflow-hidden">
-            <SmartImage src={image} alt={product.name} className="transition-transform duration-300 group-hover:scale-105" fallbackIcon={<Package className="h-10 w-10" />} />
-            <div className="absolute left-2 top-2 flex flex-col gap-1">
-              {discount > 0 && <Badge variant="destructive">-{discount}%</Badge>}
-              {product.featured && <Badge variant="default">Featured</Badge>}
+        <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/60 bg-card transition-all duration-300 hover:border-primary/30 hover:shadow-luxury-lg hover:-translate-y-1">
+          <div className="relative aspect-[4/5] overflow-hidden">
+            <SmartImage src={image} alt={product.name} className="transition-transform duration-500 group-hover:scale-110" fallbackIcon={<Package className="h-10 w-10" />} />
+            <div className="absolute left-2.5 top-2.5 flex flex-col gap-1.5">
+              {discount > 0 && <Badge variant="destructive" className="shadow-sm">-{discount}%</Badge>}
+              {product.featured && <Badge variant="default" className="shadow-sm">Featured</Badge>}
             </div>
             {outOfStock && (
-              <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-[1px]">
+              <div className="absolute inset-0 flex items-center justify-center bg-background/70 backdrop-blur-sm">
                 <Badge variant="secondary">Out of Stock</Badge>
               </div>
             )}
-            <div className="absolute right-2 top-2 flex flex-col gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+            <div className="absolute right-2.5 top-2.5 flex flex-col gap-1.5 opacity-0 transition-all duration-300 group-hover:opacity-100">
               <button onClick={handleWishlist} className="flex h-8 w-8 items-center justify-center rounded-full bg-background/90 text-foreground shadow-sm backdrop-blur transition-colors hover:bg-background hover:text-primary" title="Add to wishlist"><Heart className="h-4 w-4" /></button>
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-background/90 text-foreground shadow-sm backdrop-blur"><Eye className="h-4 w-4" /></span>
             </div>
           </div>
-          <div className="flex flex-1 flex-col p-3">
-            <p className="text-xs text-muted-foreground">{product.brand || 'Generic'}</p>
+          <div className="flex flex-1 flex-col p-3.5">
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{product.brand || 'Generic'}</p>
             <h3 className="mt-0.5 line-clamp-2 text-sm font-medium text-foreground">{product.name}</h3>
             <div className="mt-1 flex items-center gap-1 text-xs">
               <Star className="h-3 w-3 fill-warning text-warning" />
               <span>{product.averageRating?.toFixed(1) || '0.0'}</span>
               <span className="text-muted-foreground">({product.totalReviews || 0})</span>
             </div>
-            <div className="mt-auto flex items-end justify-between pt-2">
+            <div className="mt-auto flex items-end justify-between pt-2.5">
               <div className="flex flex-col">
                 <span className="text-base font-semibold font-editorial text-primary">{formatPrice(effectivePrice)}</span>
                 {discount > 0 && <span className="text-xs text-muted-foreground line-through">{formatPrice(product.price)}</span>}
               </div>
-              <Button size="icon" variant="default" onClick={handleAddToCart} disabled={outOfStock} className="h-9 w-9" title="Add to cart"><ShoppingCart className="h-4 w-4" /></Button>
+              <Button size="icon" variant="default" onClick={handleAddToCart} disabled={outOfStock} className="h-9 w-9 rounded-full" title="Add to cart"><ShoppingCart className="h-4 w-4" /></Button>
             </div>
           </div>
         </div>

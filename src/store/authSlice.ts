@@ -33,7 +33,7 @@ export const register = createAsyncThunk(
   'auth/register',
   async (data: { name: string; email: string; password: string; role: string; shopName?: string; contactNumber?: string }, { rejectWithValue }) => {
     try {
-      const response = await api.post<ApiResponse<AuthResponse>>('/api/auth/register', data);
+      const response = await api.post<ApiResponse<null>>('/api/auth/register', data);
       return response.data;
     } catch (err: unknown) {
       const error = err as { response?: { data?: { error?: string; message?: string } } };
@@ -45,8 +45,21 @@ export const register = createAsyncThunk(
 export const verifyEmail = createAsyncThunk(
   'auth/verifyEmail',
   async (data: { email: string; otp: string }, { rejectWithValue }) => {
-    try { await api.post('/api/auth/verify-email', data); return true; }
-    catch (err: unknown) {
+    try {
+      const response = await api.post<ApiResponse<AuthResponse>>('/api/auth/verify-email', data);
+      const d = response.data.data;
+      if (d && d.accessToken) {
+        const user: User = {
+          id: d.userId, name: d.name, email: d.email, role: d.role,
+          active: true, verified: true, createdAt: new Date().toISOString(),
+        };
+        storage.set('accessToken', d.accessToken);
+        storage.set('refreshToken', d.refreshToken);
+        storage.set('user', user);
+        return user;
+      }
+      return null;
+    } catch (err: unknown) {
       const error = err as { response?: { data?: { error?: string; message?: string } } };
       return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Verification failed');
     }
@@ -65,6 +78,15 @@ const authSlice = createSlice({
     b.addCase(login.pending, (s) => { s.isLoading = true; s.error = null; })
       .addCase(login.fulfilled, (s, a) => { s.isLoading = false; s.user = a.payload; s.isAuthenticated = true; })
       .addCase(login.rejected, (s, a) => { s.isLoading = false; s.error = a.payload as string; })
+      .addCase(register.pending, (s) => { s.isLoading = true; s.error = null; })
+      .addCase(register.fulfilled, (s) => { s.isLoading = false; })
+      .addCase(register.rejected, (s, a) => { s.isLoading = false; s.error = a.payload as string; })
+      .addCase(verifyEmail.pending, (s) => { s.isLoading = true; s.error = null; })
+      .addCase(verifyEmail.fulfilled, (s, a) => {
+        s.isLoading = false;
+        if (a.payload) { s.user = a.payload; s.isAuthenticated = true; }
+      })
+      .addCase(verifyEmail.rejected, (s, a) => { s.isLoading = false; s.error = a.payload as string; })
       .addCase(logout.fulfilled, (s) => { s.user = null; s.isAuthenticated = false; });
   },
 });

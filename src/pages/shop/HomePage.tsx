@@ -129,7 +129,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Categories Carousel */}
+      {/* Categories — Editorial Mosaic */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-7 flex items-end justify-between">
           <div>
@@ -143,16 +143,24 @@ export default function HomePage() {
         ) : categories.length === 0 ? (
           <EmptyState icon={Package} title="No categories yet" description="Categories will appear here once sellers add them." />
         ) : (
-          <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             {categories.map((cat, i) => (
-              <motion.div key={cat.id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }}>
+              <motion.div key={cat.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04, duration: 0.4 }}>
                 <Link to={`/shop/products?categoryId=${cat.id}`} className="group block">
-                  <Card className="w-36 shrink-0 overflow-hidden transition-all duration-300 hover:shadow-luxury-lg hover:-translate-y-0.5 sm:w-44">
-                    <div className="flex h-28 items-center justify-center bg-secondary/60 sm:h-32">
-                      {cat.imageUrl ? <SmartImage src={cat.imageUrl} alt={cat.name} className="transition-transform duration-300 group-hover:scale-105" fallbackIcon={<Package className="h-10 w-10 text-primary/40" />} /> : <Package className="h-10 w-10 text-primary/40" />}
+                  <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-secondary/40 via-secondary/20 to-transparent">
+                    {cat.imageUrl ? (
+                      <SmartImage src={cat.imageUrl} alt={cat.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" fallbackIcon={<Package className="h-10 w-10 text-primary/40" />} />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Package className="h-10 w-10 text-primary/30" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 p-3">
+                      <p className="truncate text-sm font-medium text-foreground">{cat.name}</p>
+                      <p className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">Shop now <ArrowRight className="h-2.5 w-2.5" /></p>
                     </div>
-                    <CardContent className="p-3 text-center"><p className="truncate text-sm font-medium">{cat.name}</p></CardContent>
-                  </Card>
+                  </div>
                 </Link>
               </motion.div>
             ))}
@@ -160,7 +168,7 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* Featured Products */}
+      {/* Featured Products — Editorial Spotlight */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-7 flex items-end justify-between">
           <div>
