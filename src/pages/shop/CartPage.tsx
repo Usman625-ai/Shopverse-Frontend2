@@ -101,12 +101,30 @@ export default function CartPage() {
   const shippingProgress = Math.min(100, (localCart.total / FREE_SHIPPING_THRESHOLD) * 100);
 
   return (
-    <div className="space-y-7 pb-8">
-      <div>
-        <span className="eyebrow">Your Selections</span>
-        <h1 className="mt-1.5 font-editorial text-4xl font-normal tracking-tight">Shopping Cart</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{localCart.items.length} item{localCart.items.length !== 1 ? 's' : ''} in your cart</p>
-      </div>
+    <div className="pb-10">
+      {/* Editorial header band */}
+      <section className="relative overflow-hidden border-b border-border/60 bg-gradient-to-br from-[#1a1410] via-[#15110d] to-[#0d0a07]">
+        <div className="pointer-events-none absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#d4a857 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+        <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+        <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <ShoppingBag className="h-3.5 w-3.5 text-primary-300" />
+                <span className="text-xs font-semibold uppercase tracking-[0.22em] text-primary-300">Your Selections</span>
+              </div>
+              <h1 className="mt-3 font-editorial text-4xl font-normal italic tracking-tight text-white sm:text-5xl">Shopping Cart</h1>
+              <p className="mt-2 text-sm text-white/55">{localCart.items.length} item{localCart.items.length !== 1 ? 's' : ''} reserved for you</p>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-sm text-white/45">Subtotal</span>
+              <span className="font-editorial text-3xl font-medium text-primary-300">{formatPrice(localCart.subtotal)}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="mx-auto max-w-7xl space-y-7 px-4 pt-8 sm:px-6 lg:px-8">
 
       {/* Free shipping progress */}
       <div className="surface-panel rounded-xl p-4">
@@ -201,6 +219,7 @@ export default function CartPage() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

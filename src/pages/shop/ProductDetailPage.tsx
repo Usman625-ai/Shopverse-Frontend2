@@ -139,8 +139,39 @@ export default function ProductDetailPage() {
   const specs = product.specifications ? (typeof product.specifications === 'string' ? (() => { try { return JSON.parse(product.specifications); } catch { return null; } })() : product.specifications) : null;
 
   return (
-    <div className="space-y-8 pb-8">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"><ChevronLeft className="h-4 w-4" /> Back</button>
+    <div className="pb-10">
+      {/* Editorial header band */}
+      <section className="relative overflow-hidden border-b border-border/60 bg-gradient-to-br from-[#1a1410] via-[#15110d] to-[#0d0a07]">
+        <div className="pointer-events-none absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#d4a857 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+        <div className="pointer-events-none absolute -left-20 -top-20 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+        <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-white/55 transition-colors hover:text-white"><ChevronLeft className="h-4 w-4" /> Back to collection</button>
+          <div className="mt-5 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="border-white/15 bg-white/5 text-white/80">{product.categoryName || product.category?.name || 'Uncategorized'}</Badge>
+                {product.featured && <Badge variant="default">Featured</Badge>}
+              </div>
+              <h1 className="mt-3 font-editorial text-4xl font-normal italic tracking-tight text-white sm:text-5xl">{product.name}</h1>
+              <p className="mt-2 text-sm text-white/55">{product.brand || 'Generic'} · SKU: {product.sku || 'N/A'}</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <StarRating rating={product.averageRating || 0} size={18} />
+                <span className="text-sm font-medium text-white">{product.averageRating?.toFixed(1) || '0.0'}</span>
+                <span className="text-sm text-white/45">({product.totalReviews || 0})</span>
+              </div>
+              <div className="h-8 w-px bg-white/15" />
+              <div className="flex items-baseline gap-2">
+                <span className="font-editorial text-3xl font-medium text-primary-300">{formatPrice(effectivePrice)}</span>
+                {discount > 0 && <span className="text-base text-white/40 line-through">{formatPrice(product.price)}</span>}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="mx-auto max-w-7xl space-y-8 px-4 pt-8 sm:px-6 lg:px-8">
 
       {/* Product Main */}
       <div className="grid gap-8 lg:grid-cols-2">
@@ -312,6 +343,7 @@ export default function ProductDetailPage() {
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }

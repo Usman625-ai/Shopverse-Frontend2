@@ -174,7 +174,6 @@ export default function ProfilePage() {
             <Field label="Full Name" required><div className="relative"><User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input className="pl-10" value={profileForm.name} onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} /></div></Field>
             <Field label="Email"><div className="relative"><Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input className="pl-10" value={profile?.email || ''} disabled /></div></Field>
             <Field label="Contact Number"><div className="relative"><Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input className="pl-10" placeholder="03XX-XXXXXXX" value={profileForm.contactNumber} onChange={(e) => setProfileForm({ ...profileForm, contactNumber: e.target.value })} /></div></Field>
-            <Field label="Profile Image URL"><Input placeholder="https://..." value={profileForm.profileImage} onChange={(e) => setProfileForm({ ...profileForm, profileImage: e.target.value })} /></Field>
             <Button onClick={saveProfile} loading={savingProfile}>Save Changes</Button>
           </CardContent>
         </Card>
