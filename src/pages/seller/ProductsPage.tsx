@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Plus, Pencil, Trash2, Package, Search, Upload, X, AlertTriangle, ImageIcon, Loader2,
+  Plus, Pencil, Trash2, Package, Search, Upload, X, AlertTriangle, ImageIcon, Loader2, Power,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../lib/api';
@@ -53,12 +53,13 @@ export default function ProductsPage() {
   const [stockModal, setStockModal] = useState<Product | null>(null);
   const [stockValue, setStockValue] = useState('');
   const [stockSaving, setStockSaving] = useState(false);
+  const [statusLoadingId, setStatusLoadingId] = useState<number | null>(null);
 
   const fetchProducts = useCallback(async (p: number) => {
     setLoading(true);
     try {
       const res = await api.get<ApiResponse<PagedResponse<Product>>>('/api/seller/products', {
-        params: { page: p, size: 10 },
+        params: { page: p, size: 10, includeInactive: true },
       });
       setProducts(res.data.data.content);
       setTotalPages(res.data.data.totalPages);
@@ -152,6 +153,20 @@ export default function ProductsPage() {
       toast.error(e.response?.data?.error || e.response?.data?.message || (editing ? 'Failed to update product' : 'Failed to create product'));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const toggleStatus = async (product: Product) => {
+    setStatusLoadingId(product.id);
+    try {
+      await api.put(`/api/seller/products/${product.id}/status`, { active: !product.active });
+      setProducts((prev) => prev.map((p) => (p.id === product.id ? { ...p, active: !p.active } : p)));
+      toast.success(`Product ${!product.active ? 'activated' : 'deactivated'}`);
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { error?: string; message?: string } } };
+      toast.error(e.response?.data?.error || e.response?.data?.message || 'Failed to update product status');
+    } finally {
+      setStatusLoadingId(null);
     }
   };
 
@@ -313,6 +328,16 @@ export default function ProductsPage() {
                         <div className="flex items-center justify-end gap-1">
                           <Button variant="ghost" size="icon" onClick={() => openEdit(product)} title="Edit">
                             <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => toggleStatus(product)}
+                            loading={statusLoadingId === product.id}
+                            className={product.active ? 'text-muted-foreground hover:text-warning' : 'text-muted-foreground hover:text-success'}
+                            title={product.active ? 'Deactivate' : 'Activate'}
+                          >
+                            <Power className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
@@ -547,3 +572,4 @@ export default function ProductsPage() {
     </div>
   );
 }
+

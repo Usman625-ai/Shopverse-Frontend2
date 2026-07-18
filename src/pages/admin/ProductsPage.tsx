@@ -26,17 +26,17 @@ export default function ProductsPage() {
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.get<ApiResponse<PagedResponse<Product>>>('/api/products', { params: { page, size } });
+      const res = await api.get<ApiResponse<PagedResponse<Product>>>('/api/admin/products', {
+        params: {
+          page,
+          size,
+          q: search.trim() || undefined,
+          active: statusFilter === 'active' ? true : statusFilter === 'inactive' ? false : undefined,
+        },
+      });
       const pr = res.data.data;
       if (!pr) return;
-      let list = pr.content || [];
-      if (search.trim()) {
-        const q = search.toLowerCase();
-        list = list.filter((p) => p.name.toLowerCase().includes(q) || (p.sku || '').toLowerCase().includes(q) || (p.brand || '').toLowerCase().includes(q));
-      }
-      if (statusFilter === 'active') list = list.filter((p) => p.active);
-      if (statusFilter === 'inactive') list = list.filter((p) => !p.active);
-      setProducts(list);
+      setProducts(pr.content || []);
       setTotalPages(pr.totalPages);
       setTotalElements(pr.totalElements);
     } catch (err: unknown) {
