@@ -1,7 +1,32 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import type { Category } from '../types';
 
 export function cn(...inputs: ClassValue[]) { return twMerge(clsx(inputs)); }
+
+/**
+ * The category endpoints return a nested tree (root categories with a
+ * `children` array populated recursively). Some UI needs a flat list of
+ * EVERY category — parents and all levels of subcategories — for example
+ * to populate a "select a category" dropdown or a filter rail. This walks
+ * the tree and returns every node as a flat array, tagging each with its
+ * `depth` (0 = root) so callers can indent/label subcategories.
+ */
+export function flattenCategories(cats: Category[] = []): Array<Category & { depth: number }> {
+  const out: Array<Category & { depth: number }> = [];
+  const walk = (list: Category[], depth: number) => {
+    list.forEach((c) => {
+      // Drop the nested `children` reference on the flat entry itself —
+      // consumers that rebuild a tree (e.g. buildTree by parentId) should
+      // recompute it fresh rather than carry around a stale nested subtree.
+      const { children, ...rest } = c;
+      out.push({ ...rest, depth });
+      if (children && children.length > 0) walk(children, depth + 1);
+    });
+  };
+  walk(cats, 0);
+  return out;
+}
 
 export function formatPrice(price: number | string, currency: string = 'PKR'): string {
   const num = typeof price === 'string' ? parseFloat(price) : price;

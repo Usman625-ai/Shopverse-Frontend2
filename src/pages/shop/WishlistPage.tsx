@@ -54,62 +54,84 @@ export default function WishlistPage() {
     } catch (err) { toast.error(err as string); } finally { setMovingIds((p) => p.filter((id) => id !== product.id)); }
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-6 pb-8">
-        <Skeleton className="h-8 w-48" />
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">{Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-xl" />)}</div>
-      </div>
-    );
-  }
-
-  if (items.length === 0) {
-    return <EmptyState icon={Heart} title="Your wishlist is empty" description="Save items you love to your wishlist for later." actionLabel="Browse Products" onAction={() => navigate('/shop/products')} />;
-  }
-
   return (
-    <div className="space-y-6 pb-8">
-      <div>
-        <h1 className="font-editorial text-3xl font-normal tracking-tight">My Wishlist</h1>
-        <p className="text-sm text-muted-foreground">{totalElements} item{totalElements !== 1 ? 's' : ''} saved</p>
-      </div>
+    <div className="pb-10">
+      {/* Editorial header band */}
+      <section className="relative overflow-hidden border-b border-border/60 bg-gradient-to-br from-[#1a1410] via-[#15110d] to-[#0d0a07]">
+        <div className="pointer-events-none absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#d4a857 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+        <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+        <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+          <div className="flex items-center gap-2">
+            <Heart className="h-3.5 w-3.5 text-primary-300" />
+            <span className="text-xs font-semibold uppercase tracking-[0.22em] text-primary-300">Saved For Later</span>
+          </div>
+          <h1 className="mt-3 font-editorial text-4xl font-normal italic tracking-tight text-white sm:text-5xl">My Wishlist</h1>
+          <p className="mt-2 text-sm text-white/55">{totalElements} item{totalElements !== 1 ? 's' : ''} saved</p>
+        </div>
+      </section>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-        <AnimatePresence>
-          {items.map((product, i) => {
-            const images = getProductImages(product);
-            const image = images[0] || '';
-            const effPrice = getEffectivePrice(product);
-            const discount = getDiscountPercentage(product.price, product.discountedPrice);
-            const outOfStock = product.stockQuantity <= 0;
-            const isMoving = movingIds.includes(product.id);
-            return (
-              <motion.div key={product.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ delay: Math.min(i * 0.03, 0.3) }}>
-                <div className="group flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-card shadow-luxury transition-all hover:shadow-md">
-                  <button onClick={() => navigate(`/shop/product/${product.slug}`)} className="relative aspect-square overflow-hidden bg-muted">
-                    {image ? <SmartImage src={image} alt={product.name} className="transition-transform group-hover:scale-105" fallbackIcon={<Package className="h-10 w-10" />} /> : <div className="flex h-full w-full items-center justify-center text-muted-foreground"><Package className="h-10 w-10" /></div>}
-                    {discount > 0 && <Badge variant="destructive" className="absolute left-2 top-2">-{discount}%</Badge>}
-                    {outOfStock && <div className="absolute inset-0 flex items-center justify-center bg-background/60"><Badge variant="secondary">Out of Stock</Badge></div>}
-                  </button>
-                  <div className="flex flex-1 flex-col p-3">
-                    <p className="text-xs text-muted-foreground">{product.brand || 'Generic'}</p>
-                    <button onClick={() => navigate(`/shop/product/${product.slug}`)} className="mt-0.5 line-clamp-2 text-left text-sm font-medium hover:text-primary">{product.name}</button>
-                    <div className="mt-auto flex items-end justify-between pt-2">
-                      <div><span className="text-base font-semibold text-primary">{formatPrice(effPrice)}</span>{discount > 0 && <span className="ml-1 text-xs text-muted-foreground line-through">{formatPrice(product.price)}</span>}</div>
-                    </div>
-                    <div className="mt-2 flex gap-2">
-                      <Button size="sm" className="flex-1" onClick={() => moveToCart(product)} disabled={outOfStock || isMoving} loading={isMoving}><ShoppingCart className="h-3.5 w-3.5" /> {isMoving ? 'Moving...' : 'Move to Cart'}</Button>
-                      <Button size="sm" variant="outline" onClick={() => removeFromWishlist(product.id)} title="Remove"><Trash2 className="h-3.5 w-3.5" /></Button>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
-      </div>
+      <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
+        {loading ? (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">{Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-xl" />)}</div>
+        ) : items.length === 0 ? (
+          <EmptyState icon={Heart} title="Your wishlist is empty" description="Save items you love to your wishlist for later." actionLabel="Browse Products" onAction={() => navigate('/shop/products')} />
+        ) : (
+          <>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              <AnimatePresence>
+                {items.map((product, i) => {
+                  const images = getProductImages(product);
+                  const image = images[0] || '';
+                  const effPrice = getEffectivePrice(product);
+                  const discount = getDiscountPercentage(product.price, product.discountedPrice);
+                  const outOfStock = product.stockQuantity <= 0;
+                  const isMoving = movingIds.includes(product.id);
+                  return (
+                    <motion.div
+                      key={product.id}
+                      layout
+                      initial={{ opacity: 0, y: 14, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.85 }}
+                      whileHover={{ y: -4 }}
+                      transition={{ delay: Math.min(i * 0.03, 0.3), type: 'spring', stiffness: 260, damping: 22 }}
+                    >
+                      <div className="group flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-card shadow-luxury transition-shadow duration-300 hover:shadow-luxury-lg">
+                        <button onClick={() => navigate(`/shop/product/${product.slug}`)} className="relative aspect-square overflow-hidden bg-muted">
+                          {image ? <SmartImage src={image} alt={product.name} className="transition-transform duration-500 group-hover:scale-110" fallbackIcon={<Package className="h-10 w-10" />} /> : <div className="flex h-full w-full items-center justify-center text-muted-foreground"><Package className="h-10 w-10" /></div>}
+                          {discount > 0 && <Badge variant="destructive" className="absolute left-2 top-2">-{discount}%</Badge>}
+                          {outOfStock && <div className="absolute inset-0 flex items-center justify-center bg-background/60"><Badge variant="secondary">Out of Stock</Badge></div>}
+                          <motion.button
+                            onClick={(e) => { e.stopPropagation(); removeFromWishlist(product.id); }}
+                            whileTap={{ scale: 0.85 }}
+                            className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-background/80 text-destructive opacity-0 backdrop-blur transition-opacity duration-200 group-hover:opacity-100"
+                            title="Remove"
+                          >
+                            <Heart className="h-3.5 w-3.5 fill-current" />
+                          </motion.button>
+                        </button>
+                        <div className="flex flex-1 flex-col p-3">
+                          <p className="text-xs text-muted-foreground">{product.brand || 'Generic'}</p>
+                          <button onClick={() => navigate(`/shop/product/${product.slug}`)} className="mt-0.5 line-clamp-2 text-left text-sm font-medium transition-colors hover:text-primary">{product.name}</button>
+                          <div className="mt-auto flex items-end justify-between pt-2">
+                            <div><span className="text-base font-semibold text-primary">{formatPrice(effPrice)}</span>{discount > 0 && <span className="ml-1 text-xs text-muted-foreground line-through">{formatPrice(product.price)}</span>}</div>
+                          </div>
+                          <div className="mt-2 flex gap-2">
+                            <Button size="sm" className="flex-1" onClick={() => moveToCart(product)} disabled={outOfStock || isMoving} loading={isMoving}><ShoppingCart className="h-3.5 w-3.5" /> {isMoving ? 'Moving...' : 'Move to Cart'}</Button>
+                            <Button size="sm" variant="outline" onClick={() => removeFromWishlist(product.id)} title="Remove"><Trash2 className="h-3.5 w-3.5" /></Button>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </div>
 
-      {totalPages > 1 && <Pagination currentPage={page + 1} totalPages={totalPages} onPageChange={(p) => setPage(p - 1)} />}
+            {totalPages > 1 && <div className="mt-6"><Pagination currentPage={page + 1} totalPages={totalPages} onPageChange={(p) => setPage(p - 1)} /></div>}
+          </>
+        )}
+      </div>
     </div>
   );
 }

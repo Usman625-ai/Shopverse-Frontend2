@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { SlidersHorizontal, Grid, List, X, Package, Search, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import api from '../../lib/api';
 import type { Product, Category, ApiResponse, PagedResponse } from '../../types';
-import { cn } from '../../lib/utils';
+import { cn, flattenCategories } from '../../lib/utils';
 import { Button, Input, SkeletonCard, Badge } from '../../components/ui';
 import ProductCard from '../../components/shop/ProductCard';
 import Pagination from '../../components/shop/Pagination';
@@ -46,7 +46,10 @@ export default function ProductsPage() {
         api.get<ApiResponse<Category[]>>('/api/categories'),
         api.get<ApiResponse<string[]>>('/api/brands'),
       ]);
-      setCategories(catRes.data.data || []);
+      // API returns a nested tree — flatten it so the category rail below
+      // lets shoppers filter by subcategories too (products are assigned
+      // to subcategories, so filtering by parent-only hid everything).
+      setCategories(flattenCategories(catRes.data.data || []));
       setBrands(brandRes.data.data || []);
     } catch { /* ignore */ }
   }, []);
@@ -150,7 +153,7 @@ export default function ProductsPage() {
               <div ref={railRef} className="flex flex-1 gap-2 overflow-x-auto scroll-smooth px-1 scrollbar-thin md:px-9">
                 <button onClick={() => updateParam('categoryId', '')} className={cn('shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-all', !categoryId ? 'border-primary bg-primary text-primary-foreground shadow-sm' : 'border-border bg-card hover:border-primary/40')}>All</button>
                 {categories.map((c) => (
-                  <button key={c.id} onClick={() => updateParam('categoryId', String(c.id))} className={cn('shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-all', categoryId === String(c.id) ? 'border-primary bg-primary text-primary-foreground shadow-sm' : 'border-border bg-card hover:border-primary/40')}>{c.name}</button>
+                  <button key={c.id} onClick={() => updateParam('categoryId', String(c.id))} className={cn('shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-all', categoryId === String(c.id) ? 'border-primary bg-primary text-primary-foreground shadow-sm' : 'border-border bg-card hover:border-primary/40')}>{c.depth ? `${'—'.repeat(c.depth)} ` : ''}{c.name}</button>
                 ))}
               </div>
               <button onClick={() => scrollRail(1)} className="absolute right-0 z-10 hidden h-8 w-8 items-center justify-center rounded-full border border-border bg-card shadow-luxury md:flex"><ChevronRight className="h-4 w-4" /></button>

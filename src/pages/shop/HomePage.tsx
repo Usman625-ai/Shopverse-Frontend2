@@ -98,9 +98,16 @@ export default function HomePage() {
           {features.map((f, i) => {
             const I = f.icon;
             return (
-              <motion.div key={f.title} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                <Card className="flex items-center gap-3 p-4">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-primary/15 bg-primary/5 text-primary"><I className="h-[18px] w-[18px]" strokeWidth={1.75} /></div>
+              <motion.div
+                key={f.title}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.5 }}
+                whileHover={{ y: -3 }}
+                transition={{ delay: i * 0.06, duration: 0.4 }}
+              >
+                <Card className="flex items-center gap-3 p-4 transition-shadow duration-300 hover:shadow-luxury">
+                  <motion.div whileHover={{ rotate: 8, scale: 1.08 }} transition={{ type: 'spring', stiffness: 300 }} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-primary/15 bg-primary/5 text-primary"><I className="h-[18px] w-[18px]" strokeWidth={1.75} /></motion.div>
                   <div><p className="text-sm font-medium">{f.title}</p><p className="text-xs text-muted-foreground">{f.desc}</p></div>
                 </Card>
               </motion.div>
@@ -117,7 +124,14 @@ export default function HomePage() {
             { title: 'Top Rated', sub: 'Loved by customers', href: '/shop/products?sortBy=averageRating,DESC', tone: 'from-[#1a1f1a] to-[#0b0d0a]' },
             { title: 'Best Value', sub: 'Great deals, low prices', href: '/shop/products?sortBy=price,ASC', tone: 'from-[#20140f] to-[#0d0908]' },
           ].map((b, i) => (
-            <motion.div key={b.title} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
+            <motion.div
+              key={b.title}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.4 }}
+              whileHover={{ scale: 1.02 }}
+              transition={{ delay: i * 0.08, duration: 0.4 }}
+            >
               <Link to={b.href} className={`group relative flex h-32 flex-col justify-end overflow-hidden rounded-xl bg-gradient-to-br ${b.tone} p-5 text-white`}>
                 <div className="pointer-events-none absolute inset-0 opacity-[0.06] transition-opacity group-hover:opacity-[0.1]" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '18px 18px' }} />
                 <p className="font-editorial text-xl italic">{b.title}</p>
@@ -145,7 +159,14 @@ export default function HomePage() {
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             {categories.map((cat, i) => (
-              <motion.div key={cat.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04, duration: 0.4 }}>
+              <motion.div
+                key={cat.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                whileHover={{ y: -4 }}
+                transition={{ delay: Math.min(i * 0.04, 0.3), duration: 0.4 }}
+              >
                 <Link to={`/shop/products?categoryId=${cat.id}`} className="group block">
                   <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-secondary/40 via-secondary/20 to-transparent">
                     {cat.imageUrl ? (
@@ -186,6 +207,28 @@ export default function HomePage() {
             {featured.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
           </div>
         )}
+      </section>
+
+      {/* Newsletter / trust band */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.4 }}
+          transition={{ duration: 0.5 }}
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#241812] via-[#1a120d] to-[#0f0b08] px-6 py-12 text-center text-white sm:px-16"
+        >
+          <div className="pointer-events-none absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
+          <div className="relative">
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary-300">Stay in the loop</span>
+            <h2 className="mt-3 font-editorial text-3xl font-normal italic tracking-tight sm:text-4xl">Never miss a deal</h2>
+            <p className="mx-auto mt-2 max-w-md text-sm text-white/60">New arrivals, exclusive discounts, and seller spotlights — straight to your inbox.</p>
+            <form onSubmit={(e) => e.preventDefault()} className="mx-auto mt-6 flex max-w-md flex-col gap-2 sm:flex-row">
+              <input type="email" placeholder="you@example.com" className="h-11 flex-1 rounded-full border border-white/15 bg-white/5 px-4 text-sm text-white placeholder:text-white/40 backdrop-blur focus:outline-none focus:ring-2 focus:ring-primary-300/40" />
+              <Button size="lg" className="bg-white text-[#1a1510] hover:bg-white/90">Subscribe</Button>
+            </form>
+          </div>
+        </motion.div>
       </section>
     </div>
   );

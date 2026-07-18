@@ -2,14 +2,15 @@ import { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { Trash2, Minus, Plus, ShoppingBag, Tag, X, ArrowRight, Package, Truck } from 'lucide-react';
+import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, Package, Truck } from 'lucide-react';
 import api from '../../lib/api';
-import type { Cart, ApiResponse } from '../../types';
+import type { Cart } from '../../types';
 import { formatPrice, cn } from '../../lib/utils';
-import { Button, Skeleton, Input, Badge, SmartImage } from '../../components/ui';
+import { Button, Skeleton, Badge, SmartImage } from '../../components/ui';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchCart, updateCartItem, removeFromCart } from '../../store/cartSlice';
 import EmptyState from '../../components/shop/EmptyState';
+import CouponSelector, { type AppliedCoupon } from '../../components/shop/CouponSelector';
 
 const FREE_SHIPPING_THRESHOLD = 5000;
 
@@ -19,9 +20,7 @@ export default function CartPage() {
   const { isAuthenticated } = useAppSelector((s) => s.auth);
   const { cart, isLoading } = useAppSelector((s) => s.cart);
   const [localCart, setLocalCart] = useState<Cart | null>(null);
-  const [couponCode, setCouponCode] = useState('');
-  const [appliedCoupon, setAppliedCoupon] = useState<string | undefined>();
-  const [couponLoading, setCouponLoading] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | undefined>();
   const [updatingIds, setUpdatingIds] = useState<number[]>([]);
 
   const loadCart = useCallback(async () => {
@@ -30,11 +29,7 @@ export default function CartPage() {
   }, [dispatch, isAuthenticated]);
 
   useEffect(() => { loadCart(); }, [loadCart]);
-  useEffect(() => {
-    setLocalCart(cart);
-    setCouponCode(cart?.appliedCoupon || '');
-    setAppliedCoupon(cart?.appliedCoupon);
-  }, [cart]);
+  useEffect(() => { setLocalCart(cart); }, [cart]);
 
   const handleQuantity = async (itemId: number, quantity: number, stock: number) => {
     if (quantity < 1) return;
@@ -54,26 +49,9 @@ export default function CartPage() {
     } catch (err) { toast.error(err as string); }
   };
 
-  const applyCoupon = async () => {
-    if (!couponCode.trim()) { toast.error('Enter a coupon code'); return; }
-    if (!localCart) return;
-    setCouponLoading(true);
-    try {
-      await api.post('/api/customer/coupons/validate', { couponCode: couponCode, orderAmount: localCart.subtotal });
-      setAppliedCoupon(couponCode);
-      toast.success('Coupon applied successfully');
-      await dispatch(fetchCart());
-    } catch (err: unknown) {
-      const e = err as { response?: { data?: { error?: string } } };
-      toast.error(e.response?.data?.error || 'Invalid coupon code');
-    } finally { setCouponLoading(false); }
-  };
-
-  const removeCoupon = async () => {
-    setCouponCode('');
+  const removeCoupon = () => {
     setAppliedCoupon(undefined);
     toast.success('Coupon removed');
-    await dispatch(fetchCart());
   };
 
   if (!isAuthenticated) {
@@ -96,9 +74,11 @@ export default function CartPage() {
     return <EmptyState icon={ShoppingBag} title="Your cart is empty" description="Looks like you haven't added anything to your cart yet." actionLabel="Start Shopping" onAction={() => navigate('/shop/products')} />;
   }
 
-  const shipping = localCart.total > FREE_SHIPPING_THRESHOLD ? 0 : 200;
-  const grandTotal = localCart.total + shipping;
-  const shippingProgress = Math.min(100, (localCart.total / FREE_SHIPPING_THRESHOLD) * 100);
+  const discount = appliedCoupon?.discount || 0;
+  const discountedSubtotal = Math.max(0, localCart.total - discount);
+  const shipping = discountedSubtotal > FREE_SHIPPING_THRESHOLD ? 0 : 200;
+  const grandTotal = discountedSubtotal + shipping;
+  const shippingProgress = Math.min(100, (discountedSubtotal / FREE_SHIPPING_THRESHOLD) * 100);
 
   return (
     <div className="pb-10">
@@ -133,7 +113,7 @@ export default function CartPage() {
           {shipping === 0 ? (
             <span className="font-medium text-success">You've unlocked free shipping!</span>
           ) : (
-            <span>Add <strong className="text-foreground">{formatPrice(FREE_SHIPPING_THRESHOLD - localCart.total)}</strong> more for free shipping</span>
+            <span>Add <strong className="text-foreground">{formatPrice(FREE_SHIPPING_THRESHOLD - discountedSubtotal)}</strong> more for free shipping</span>
           )}
         </div>
         <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
@@ -192,30 +172,17 @@ export default function CartPage() {
               <h2 className="font-editorial text-xl font-medium">Order Summary</h2>
             </div>
             <div className="space-y-4 p-5">
-              {appliedCoupon ? (
-                <div className="flex items-center justify-between rounded-lg border border-success/30 bg-success/10 px-3 py-2">
-                  <div className="flex items-center gap-2 text-sm"><Tag className="h-4 w-4 text-success" /><span className="font-medium text-success">{appliedCoupon}</span></div>
-                  <button onClick={removeCoupon} className="text-muted-foreground hover:text-destructive"><X className="h-4 w-4" /></button>
-                </div>
-              ) : (
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Tag className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input placeholder="Coupon code" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} className="pl-9" />
-                  </div>
-                  <Button variant="outline" onClick={applyCoupon} loading={couponLoading}>Apply</Button>
-                </div>
-              )}
+              <CouponSelector orderAmount={localCart.total} appliedCoupon={appliedCoupon} onApply={setAppliedCoupon} onRemove={removeCoupon} />
               <div className="space-y-2 border-t border-dashed border-border pt-4 text-sm">
                 <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span className="font-medium">{formatPrice(localCart.subtotal)}</span></div>
-                {localCart.discount > 0 && <div className="flex justify-between text-success"><span>Discount</span><span>-{formatPrice(localCart.discount)}</span></div>}
+                {discount > 0 && <div className="flex justify-between text-success"><span>Discount ({appliedCoupon?.code})</span><span>-{formatPrice(discount)}</span></div>}
                 <div className="flex justify-between"><span className="text-muted-foreground">Shipping</span><span className="font-medium">{shipping === 0 ? <Badge variant="success">FREE</Badge> : formatPrice(shipping)}</span></div>
               </div>
               <div className="flex justify-between border-t border-dashed border-border pt-4">
                 <span className="font-semibold">Total</span>
                 <span className="font-editorial text-2xl font-medium text-primary">{formatPrice(grandTotal)}</span>
               </div>
-              <Button size="lg" className="w-full" onClick={() => navigate('/shop/checkout')}>Proceed to Checkout <ArrowRight className="h-4 w-4" /></Button>
+              <Button size="lg" className="w-full" onClick={() => navigate('/shop/checkout', { state: appliedCoupon ? { couponCode: appliedCoupon.code } : undefined })}>Proceed to Checkout <ArrowRight className="h-4 w-4" /></Button>
             </div>
           </div>
         </div>

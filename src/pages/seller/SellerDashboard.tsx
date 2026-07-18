@@ -1,40 +1,42 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Package, ShoppingCart, DollarSign, AlertTriangle, Clock, TrendingUp, ArrowUpRight,
+  Package, ShoppingCart, DollarSign, AlertTriangle, Clock, TrendingUp, ArrowUpRight, Store,
 } from 'lucide-react';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart,
 } from 'recharts';
 import { toast } from 'sonner';
 import api from '../../lib/api';
 import type { SellerDashboardStats, ApiResponse } from '../../types';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, Skeleton, Badge } from '../../components/ui';
-import { formatPrice, formatNumber, formatDate, cn } from '../../lib/utils';
+import { formatPrice, formatNumber } from '../../lib/utils';
 
 interface StatCardProps {
   title: string;
   value: string;
   icon: React.ReactNode;
-  accent: string;
+  gradient: string;
   delay: number;
   subtitle?: string;
 }
 
-function StatCard({ title, value, icon, accent, delay, subtitle }: StatCardProps) {
+function StatCard({ title, value, icon, gradient, delay, subtitle }: StatCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -3 }}
       transition={{ duration: 0.3, delay }}
-      className="rounded-xl border border-border/70 bg-card p-5 shadow-luxury"
     >
-      <div className="flex items-center gap-1.5 text-muted-foreground">
-        <span className={cn('flex h-5 w-5 items-center justify-center rounded [&>svg]:h-3.5 [&>svg]:w-3.5', accent.replace('bg-', 'text-'))}>{icon}</span>
-        <span className="text-[0.7rem] font-medium uppercase tracking-wider">{title}</span>
-      </div>
-      <p className="mt-2.5 text-2xl font-semibold tracking-tight">{value}</p>
-      {subtitle && <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>}
+      <Card className="overflow-hidden">
+        <CardContent className="p-5">
+          <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-white shadow-sm`}>{icon}</div>
+          <p className="mt-3.5 text-[0.7rem] font-medium uppercase tracking-wider text-muted-foreground">{title}</p>
+          <p className="mt-1 text-2xl font-bold tracking-tight text-foreground">{value}</p>
+          {subtitle && <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>}
+        </CardContent>
+      </Card>
     </motion.div>
   );
 }
@@ -50,7 +52,7 @@ export default function SellerDashboard() {
       try {
         const res = await api.get<ApiResponse<SellerDashboardStats>>('/api/seller/dashboard/stats');
         if (active) setStats(res.data.data);
-      } catch (err) {
+      } catch {
         if (active) toast.error('Failed to load dashboard stats');
       } finally {
         if (active) setLoading(false);
@@ -90,51 +92,55 @@ export default function SellerDashboard() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center gap-2">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary"><Store className="h-5 w-5" /></div>
+        <div>
+          <h1 className="text-[1.4rem] font-semibold tracking-tight text-foreground">Seller Dashboard</h1>
+          <p className="text-sm text-muted-foreground">Quick overview of your shop performance</p>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <StatCard
           title="Total Products"
           value={formatNumber(stats.totalProducts)}
-          icon={<Package className="h-5 w-5 text-primary" />}
-          accent="bg-primary"
+          icon={<Package className="h-5 w-5" />}
+          gradient="from-primary-400 to-primary-700"
           delay={0}
         />
         <StatCard
           title="Total Orders"
           value={formatNumber(stats.totalOrders)}
-          icon={<ShoppingCart className="h-5 w-5 text-primary" />}
-          accent="bg-primary"
+          icon={<ShoppingCart className="h-5 w-5" />}
+          gradient="from-primary-500 to-primary-800"
           delay={0.05}
           subtitle={`${stats.pendingOrders} pending`}
         />
         <StatCard
           title="Total Revenue"
           value={formatPrice(stats.totalRevenue)}
-          icon={<DollarSign className="h-5 w-5 text-success" />}
-          accent="bg-success"
+          icon={<DollarSign className="h-5 w-5" />}
+          gradient="from-success to-primary-700"
           delay={0.1}
         />
         <StatCard
           title="Low Stock"
           value={formatNumber(stats.lowStockProducts)}
-          icon={<AlertTriangle className="h-5 w-5 text-warning" />}
-          accent="bg-warning"
+          icon={<AlertTriangle className="h-5 w-5" />}
+          gradient="from-warning to-primary-700"
           delay={0.15}
           subtitle="Items below 10 units"
         />
         <StatCard
           title="Pending Orders"
           value={formatNumber(stats.pendingOrders)}
-          icon={<Clock className="h-5 w-5 text-warning" />}
-          accent="bg-warning"
+          icon={<Clock className="h-5 w-5" />}
+          gradient="from-primary-400 to-primary-900"
           delay={0.2}
         />
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.25 }}
-      >
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.25 }}>
         <Card>
           <CardHeader className="flex flex-row items-start justify-between">
             <div>
@@ -156,7 +162,7 @@ export default function SellerDashboard() {
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
                       <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                     </linearGradient>
                   </defs>
@@ -200,46 +206,40 @@ export default function SellerDashboard() {
         </Card>
       </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.3 }}
-      >
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.3 }}>
         <Card>
           <CardHeader>
             <CardTitle>Recent Highlights</CardTitle>
             <CardDescription>Quick overview of your shop performance</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-lg border border-border bg-muted/30 p-4">
+            <div className="rounded-xl border border-border bg-secondary/40 p-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <ArrowUpRight className="h-4 w-4 text-success" />
                 <span>Best day this week</span>
               </div>
-              <p className="mt-2 text-lg font-semibold font-display tracking-tight">
-                {formatPrice(maxSale)}
-              </p>
+              <p className="mt-2 text-lg font-semibold tracking-tight">{formatPrice(maxSale)}</p>
             </div>
-            <div className="rounded-lg border border-border bg-muted/30 p-4">
+            <div className="rounded-xl border border-border bg-secondary/40 p-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Package className="h-4 w-4 text-primary" />
                 <span>Active products</span>
               </div>
-              <p className="mt-2 text-lg font-semibold font-display tracking-tight">{formatNumber(stats.totalProducts)}</p>
+              <p className="mt-2 text-lg font-semibold tracking-tight">{formatNumber(stats.totalProducts)}</p>
             </div>
-            <div className="rounded-lg border border-border bg-muted/30 p-4">
+            <div className="rounded-xl border border-border bg-secondary/40 p-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <ShoppingCart className="h-4 w-4 text-primary" />
                 <span>Orders to fulfill</span>
               </div>
-              <p className="mt-2 text-lg font-semibold font-display tracking-tight">{formatNumber(stats.pendingOrders)}</p>
+              <p className="mt-2 text-lg font-semibold tracking-tight">{formatNumber(stats.pendingOrders)}</p>
             </div>
-            <div className="rounded-lg border border-border bg-muted/30 p-4">
+            <div className="rounded-xl border border-border bg-secondary/40 p-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <AlertTriangle className="h-4 w-4 text-warning" />
                 <span>Restock needed</span>
               </div>
-              <p className="mt-2 text-lg font-semibold font-display tracking-tight">{formatNumber(stats.lowStockProducts)}</p>
+              <p className="mt-2 text-lg font-semibold tracking-tight">{formatNumber(stats.lowStockProducts)}</p>
             </div>
           </CardContent>
         </Card>
@@ -247,3 +247,4 @@ export default function SellerDashboard() {
     </div>
   );
 }
+

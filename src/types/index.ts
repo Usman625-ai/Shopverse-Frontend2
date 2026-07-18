@@ -38,7 +38,7 @@ export interface Address {
 export interface Category {
   id: number; name: string; slug: string; description?: string;
   imageUrl?: string; parentId?: number | null; children?: Category[];
-  active?: boolean; displayOrder?: number; productCount?: number;
+  active?: boolean; displayOrder?: number; productCount?: number; depth?: number;
 }
 
 export interface ProductImage {

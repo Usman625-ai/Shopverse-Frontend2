@@ -10,7 +10,7 @@ import {
   Card, CardContent, Button, Input, Textarea, Modal, Skeleton, Field,
 } from '../../components/ui';
 import ImageUploader from '../../components/shared/ImageUploader';
-import { cn } from '../../lib/utils';
+import { cn, flattenCategories } from '../../lib/utils';
 
 interface FormState { name: string; slug: string; description: string; imageUrl: string; parentId: string; }
 
@@ -33,7 +33,10 @@ export default function CategoriesPage() {
     setLoading(true);
     try {
       const res = await api.get<ApiResponse<Category[]>>('/api/admin/categories');
-      setCategories(res.data.data || []);
+      // The API returns a nested tree (roots with `children` populated).
+      // Flatten it into a real flat list so buildTree()/parentOptions below
+      // can see subcategories at every level, not just the roots.
+      setCategories(flattenCategories(res.data.data || []));
     } catch (err: unknown) {
       const e = err as { response?: { data?: { error?: string; message?: string } } };
       toast.error(e.response?.data?.error || e.response?.data?.message || 'Failed to load categories');
@@ -188,7 +191,7 @@ export default function CategoriesPage() {
           <Field label="Parent Category">
             <select className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" value={form.parentId} onChange={(e) => setForm((f) => ({ ...f, parentId: e.target.value }))}>
               <option value="">None (Top-level)</option>
-              {parentOptions.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              {parentOptions.map((c) => <option key={c.id} value={c.id}>{'—'.repeat(c.depth ?? 0)} {c.name}</option>)}
             </select>
           </Field>
           <Field label="Description">

@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { MapPin, Plus, CreditCard, Truck, Check, Tag, X, Package, ShoppingBag, ArrowLeft } from 'lucide-react';
+import { MapPin, Plus, CreditCard, Truck, Check, Package, ShoppingBag, ArrowLeft } from 'lucide-react';
 import api from '../../lib/api';
 import type { Address, Order, ApiResponse, PaymentMethod } from '../../types';
 import { cn, formatPrice } from '../../lib/utils';
@@ -10,6 +10,7 @@ import { Button, Card, CardContent, CardHeader, CardTitle, Input, Textarea, Fiel
 import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchCart } from '../../store/cartSlice';
 import EmptyState from '../../components/shop/EmptyState';
+import CouponSelector, { type AppliedCoupon } from '../../components/shop/CouponSelector';
 
 interface AddrForm {
   fullName: string; phoneNumber: string; addressLine1: string; addressLine2: string;
@@ -19,6 +20,7 @@ const emptyAddr: AddrForm = { fullName: '', phoneNumber: '', addressLine1: '', a
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useAppDispatch();
   const { isAuthenticated } = useAppSelector((s) => s.auth);
   const { cart } = useAppSelector((s) => s.cart);
@@ -26,9 +28,7 @@ export default function CheckoutPage() {
   const [selectedAddress, setSelectedAddress] = useState<number | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CASH_ON_DELIVERY');
   const [notes, setNotes] = useState('');
-  const [couponCode, setCouponCode] = useState('');
-  const [appliedCoupon, setAppliedCoupon] = useState<string | undefined>();
-  const [couponLoading, setCouponLoading] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | undefined>();
   const [loading, setLoading] = useState(true);
   const [placing, setPlacing] = useState(false);
   const [showAddressModal, setShowAddressModal] = useState(false);
@@ -49,6 +49,25 @@ export default function CheckoutPage() {
   const loadCart = useCallback(async () => { if (isAuthenticated) await dispatch(fetchCart()); }, [dispatch, isAuthenticated]);
 
   useEffect(() => { loadAddresses(); loadCart(); }, [loadAddresses, loadCart]);
+
+  // If a coupon was applied on the Cart page, re-validate it here to get an accurate discount
+  useEffect(() => {
+    const carriedCode = (location.state as { couponCode?: string } | null)?.couponCode;
+    if (!carriedCode || !cart || appliedCoupon) return;
+    (async () => {
+      try {
+        const res = await api.post<ApiResponse<{ code: string; applicableDiscount: number }>>('/api/customer/coupons/validate', {
+          couponCode: carriedCode,
+          orderAmount: cart.total,
+        });
+        const data = res.data.data;
+        if (data) setAppliedCoupon({ code: data.code, discount: data.applicableDiscount || 0 });
+      } catch {
+        // coupon no longer valid at checkout total — silently drop it, user can reapply
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cart]);
 
   const openAddAddress = () => { setEditingAddress(null); setAddrForm(emptyAddr); setShowAddressModal(true); };
   const openEditAddress = (addr: Address) => {
@@ -79,25 +98,12 @@ export default function CheckoutPage() {
     catch { toast.error('Failed to delete address'); }
   };
 
-  const applyCoupon = async () => {
-    if (!couponCode.trim()) { toast.error('Enter a coupon code'); return; }
-    if (!cart) return;
-    setCouponLoading(true);
-    try {
-      await api.post('/api/customer/coupons/validate', { couponCode: couponCode, orderAmount: cart.subtotal });
-      setAppliedCoupon(couponCode); toast.success('Coupon applied');
-    } catch (err: unknown) {
-      const e = err as { response?: { data?: { error?: string } } };
-      toast.error(e.response?.data?.error || 'Invalid coupon');
-    } finally { setCouponLoading(false); }
-  };
-
   const placeOrder = async () => {
     if (!selectedAddress) { toast.error('Please select a shipping address'); return; }
     if (!cart || cart.items.length === 0) { toast.error('Your cart is empty'); return; }
     setPlacing(true);
     try {
-      const res = await api.post<ApiResponse<Order[]>>('/api/customer/orders/checkout', { addressId: selectedAddress, paymentMethod, couponCode: appliedCoupon, notes });
+      const res = await api.post<ApiResponse<Order[]>>('/api/customer/orders/checkout', { addressId: selectedAddress, paymentMethod, couponCode: appliedCoupon?.code, notes });
       const orders = res.data.data || [];
       if (paymentMethod === 'JAZZCASH' && orders.length > 0) {
         try {
@@ -143,8 +149,10 @@ export default function CheckoutPage() {
 
   if (!cart || cart.items.length === 0) return <EmptyState icon={ShoppingBag} title="Your cart is empty" description="Add items to your cart before checking out." actionLabel="Start Shopping" onAction={() => navigate('/shop/products')} />;
 
-  const shipping = cart.total > 5000 ? 0 : 200;
-  const grandTotal = cart.total + shipping;
+  const discount = appliedCoupon?.discount || 0;
+  const discountedSubtotal = Math.max(0, cart.total - discount);
+  const shipping = discountedSubtotal > 5000 ? 0 : 200;
+  const grandTotal = discountedSubtotal + shipping;
 
   return (
     <div className="space-y-6 pb-8">
@@ -226,22 +234,12 @@ export default function CheckoutPage() {
               </div>
 
               <div className="border-t border-border pt-4">
-                {appliedCoupon ? (
-                  <div className="flex items-center justify-between rounded-lg border border-success/30 bg-success/10 px-3 py-2">
-                    <div className="flex items-center gap-2 text-sm"><Tag className="h-4 w-4 text-success" /><span className="font-medium text-success">{appliedCoupon}</span></div>
-                    <button onClick={() => { setAppliedCoupon(undefined); setCouponCode(''); }} className="text-muted-foreground hover:text-destructive"><X className="h-4 w-4" /></button>
-                  </div>
-                ) : (
-                  <div className="flex gap-2">
-                    <Input placeholder="Coupon code" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} />
-                    <Button variant="outline" onClick={applyCoupon} loading={couponLoading}>Apply</Button>
-                  </div>
-                )}
+                <CouponSelector orderAmount={cart.total} appliedCoupon={appliedCoupon} onApply={setAppliedCoupon} onRemove={() => { setAppliedCoupon(undefined); toast.success('Coupon removed'); }} />
               </div>
 
               <div className="space-y-2 border-t border-border pt-4 text-sm">
                 <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{formatPrice(cart.subtotal)}</span></div>
-                {cart.discount > 0 && <div className="flex justify-between text-success"><span>Discount</span><span>-{formatPrice(cart.discount)}</span></div>}
+                {discount > 0 && <div className="flex justify-between text-success"><span>Discount ({appliedCoupon?.code})</span><span>-{formatPrice(discount)}</span></div>}
                 <div className="flex justify-between"><span className="text-muted-foreground">Shipping</span><span>{shipping === 0 ? <Badge variant="success">FREE</Badge> : formatPrice(shipping)}</span></div>
               </div>
               <div className="flex justify-between border-t border-border pt-4"><span className="font-semibold">Total</span><span className="text-xl font-editorial font-medium text-primary">{formatPrice(grandTotal)}</span></div>
