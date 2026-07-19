@@ -20,9 +20,9 @@ export default function Modal({ open, onClose, title, description, children, siz
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-          <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ duration: 0.2 }} className={cn('relative z-50 w-full rounded-xl border border-border/70 bg-card shadow-luxury-lg', sz[size])}>
+          <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ duration: 0.2 }} className={cn('relative z-50 flex max-h-[90vh] w-full flex-col rounded-xl border border-border/70 bg-card shadow-luxury-lg', sz[size])}>
             {(title || description) && (
-              <div className="flex items-start justify-between p-6 pb-4">
+              <div className="flex shrink-0 items-start justify-between p-6 pb-4">
                 <div>
                   {title && <h2 className="text-lg font-semibold tracking-tight">{title}</h2>}
                   {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
@@ -30,8 +30,8 @@ export default function Modal({ open, onClose, title, description, children, siz
                 <button onClick={onClose} className="rounded-lg p-1 text-muted-foreground hover:bg-accent transition-colors"><X className="h-5 w-5" /></button>
               </div>
             )}
-            <div className="p-6 pt-0">{children}</div>
-            {footer && <div className="flex justify-end gap-3 p-6 pt-0">{footer}</div>}
+            <div className="min-h-0 flex-1 overflow-y-auto p-6 pt-0">{children}</div>
+            {footer && <div className="flex shrink-0 justify-end gap-3 border-t border-border/60 p-6">{footer}</div>}
           </motion.div>
         </div>
       )}

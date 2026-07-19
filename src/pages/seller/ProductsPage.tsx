@@ -1,8 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import {
-  Plus, Pencil, Trash2, Package, Search, Upload, X, AlertTriangle, ImageIcon, Loader2, Power,
-} from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../lib/api';
 import type { Product, Category, PagedResponse, ApiResponse } from '../../types';
@@ -12,6 +9,9 @@ import {
 } from '../../components/ui';
 import ImageUploader from '../../components/shared/ImageUploader';
 import { formatPrice, formatDate, cn, getProductImages } from '../../lib/utils';
+import {
+  Plus, Pencil, Trash2, Package, Search, Upload, X, AlertTriangle, ImageIcon, Loader2, Power, Lock,
+} from 'lucide-react';
 
 interface ProductFormData {
   name: string;
@@ -35,6 +35,16 @@ const emptyForm: ProductFormData = {
 };
 
 const LOW_STOCK_THRESHOLD = 10;
+
+/** Flattens the category tree into a single list with depth, so both
+ * parent AND child categories are selectable — the API returns root
+ * categories with nested `children`, not a flat list. */
+function flattenCategories(cats: Category[], depth = 0): { id: number; name: string; depth: number }[] {
+  return cats.flatMap((c) => [
+    { id: c.id, name: c.name, depth },
+    ...(c.children && c.children.length > 0 ? flattenCategories(c.children, depth + 1) : []),
+  ]);
+}
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -157,18 +167,22 @@ export default function ProductsPage() {
   };
 
   const toggleStatus = async (product: Product) => {
-    setStatusLoadingId(product.id);
-    try {
-      await api.put(`/api/seller/products/${product.id}/status`, { active: !product.active });
-      setProducts((prev) => prev.map((p) => (p.id === product.id ? { ...p, active: !p.active } : p)));
-      toast.success(`Product ${!product.active ? 'activated' : 'deactivated'}`);
-    } catch (err: unknown) {
-      const e = err as { response?: { data?: { error?: string; message?: string } } };
-      toast.error(e.response?.data?.error || e.response?.data?.message || 'Failed to update product status');
-    } finally {
-      setStatusLoadingId(null);
-    }
-  };
+      if (!product.active && product.adminLocked) {
+        toast.error('This product was deactivated by an admin — only an admin can reactivate it.');
+        return;
+      }
+      setStatusLoadingId(product.id);
+      try {
+        await api.put(`/api/seller/products/${product.id}/status`, { active: !product.active });
+        setProducts((prev) => prev.map((p) => (p.id === product.id ? { ...p, active: !p.active } : p)));
+        toast.success(`Product ${!product.active ? 'activated' : 'deactivated'}`);
+      } catch (err: unknown) {
+        const e = err as { response?: { data?: { error?: string; message?: string } } };
+        toast.error(e.response?.data?.error || e.response?.data?.message || 'Failed to update product status');
+      } finally {
+        setStatusLoadingId(null);
+      }
+    };
 
   const handleDelete = async () => {
     if (!deleteId) return;
@@ -321,6 +335,9 @@ export default function ProductsPage() {
                           <Badge variant={product.active ? 'success' : 'secondary'}>
                             {product.active ? 'Active' : 'Inactive'}
                           </Badge>
+                          {!product.active && product.adminLocked && (
+                            <Badge variant="destructive" className="gap-1"><Lock className="h-3 w-3" /> Admin locked</Badge>
+                          )}
                           {product.featured && <Badge variant="default">Featured</Badge>}
                         </div>
                       </TableCell>
@@ -334,10 +351,14 @@ export default function ProductsPage() {
                             size="icon"
                             onClick={() => toggleStatus(product)}
                             loading={statusLoadingId === product.id}
-                            className={product.active ? 'text-muted-foreground hover:text-warning' : 'text-muted-foreground hover:text-success'}
-                            title={product.active ? 'Deactivate' : 'Activate'}
+                            className={cn(
+                              !product.active && product.adminLocked
+                                ? 'cursor-not-allowed text-muted-foreground/40'
+                                : product.active ? 'text-muted-foreground hover:text-warning' : 'text-muted-foreground hover:text-success'
+                            )}
+                            title={!product.active && product.adminLocked ? 'Deactivated by admin — cannot reactivate' : product.active ? 'Deactivate' : 'Activate'}
                           >
-                            <Power className="h-4 w-4" />
+                            {!product.active && product.adminLocked ? <Lock className="h-4 w-4" /> : <Power className="h-4 w-4" />}
                           </Button>
                           <Button
                             variant="ghost"
@@ -470,8 +491,8 @@ export default function ProductsPage() {
                 onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
               >
                 <option value="">Select category</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
+                {flattenCategories(categories).map((c) => (
+                  <option key={c.id} value={c.id}>{'—'.repeat(c.depth) + (c.depth > 0 ? ' ' : '')}{c.name}</option>
                 ))}
               </Select>
             </Field>

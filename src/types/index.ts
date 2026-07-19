@@ -55,7 +55,7 @@ export interface Product {
   sellerId?: number; sellerName?: string; shopName?: string;
   category?: Category; seller?: Seller;
   averageRating: number; totalReviews: number; totalSold?: number;
-  active: boolean; featured?: boolean; tags?: string; specifications?: string; createdAt: string;
+  active: boolean; adminLocked?: boolean; featured?: boolean; tags?: string; specifications?: string; createdAt: string;
 }
 
 export interface CartItem {
