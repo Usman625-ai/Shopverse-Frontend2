@@ -9,6 +9,7 @@ import { cn, formatPrice, formatDateTime } from '../../lib/utils';
 import { Button, Card, CardContent, Badge, Skeleton, Modal, Textarea, Field, SmartImage } from '../../components/ui';
 import EmptyState from '../../components/shop/EmptyState';
 import Pagination from '../../components/shop/Pagination';
+import PageHeader from '../../components/shop/PageHeader';
 
 const statusConfig: Record<OrderStatus, { label: string; variant: 'default' | 'success' | 'warning' | 'destructive'; icon: typeof Clock }> = {
   PENDING: { label: 'Pending', variant: 'warning', icon: Clock },
@@ -85,33 +86,23 @@ export default function OrdersPage() {
 
   return (
     <div className="pb-10">
-      {/* Editorial header band */}
-      <section className="relative overflow-hidden border-b border-border/60 bg-gradient-to-br from-[#1a1410] via-[#15110d] to-[#0d0a07]">
-        <div className="pointer-events-none absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#d4a857 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
-        <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
-        <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-          <div className="flex items-center gap-2">
-            <ClipboardList className="h-3.5 w-3.5 text-primary-300" />
-            <span className="text-xs font-semibold uppercase tracking-[0.22em] text-primary-300">Order History</span>
-          </div>
-          <h1 className="mt-3 font-editorial text-4xl font-normal italic tracking-tight text-white sm:text-5xl">My Orders</h1>
-          <p className="mt-2 text-sm text-white/55">{totalElements} order{totalElements !== 1 ? 's' : ''} total</p>
-        </div>
-      </section>
+      <PageHeader
+        icon={ClipboardList}
+        eyebrow="Order History"
+        title="My Orders"
+        subtitle={`${totalElements} order${totalElements !== 1 ? 's' : ''} total`}
+        crumbs={[{ label: 'Orders' }]}
+      />
 
       <div className="mx-auto max-w-7xl space-y-6 px-4 pt-8 sm:px-6 lg:px-8">
         {/* Status filter tabs */}
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
+        <div className="flex gap-1 overflow-x-auto rounded-lg border border-border bg-secondary/30 p-1 scrollbar-thin">
           {filterTabs.map((tab) => (
             <button
               key={tab.value}
               onClick={() => setStatusFilter(tab.value)}
-              className={cn(
-                'shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors',
-                statusFilter === tab.value
-                  ? 'border-primary bg-primary text-primary-foreground'
-                  : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'
-              )}
+              className="accent-tab shrink-0"
+              data-active={statusFilter === tab.value}
             >
               {tab.label}
             </button>

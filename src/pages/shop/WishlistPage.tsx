@@ -11,6 +11,7 @@ import { addToCart } from '../../store/cartSlice';
 import { formatPrice, getEffectivePrice, getProductImages, getDiscountPercentage } from '../../lib/utils';
 import EmptyState from '../../components/shop/EmptyState';
 import Pagination from '../../components/shop/Pagination';
+import PageHeader from '../../components/shop/PageHeader';
 
 export default function WishlistPage() {
   const navigate = useNavigate();
@@ -56,19 +57,13 @@ export default function WishlistPage() {
 
   return (
     <div className="pb-10">
-      {/* Editorial header band */}
-      <section className="relative overflow-hidden border-b border-border/60 bg-gradient-to-br from-[#1a1410] via-[#15110d] to-[#0d0a07]">
-        <div className="pointer-events-none absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#d4a857 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
-        <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
-        <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-          <div className="flex items-center gap-2">
-            <Heart className="h-3.5 w-3.5 text-primary-300" />
-            <span className="text-xs font-semibold uppercase tracking-[0.22em] text-primary-300">Saved For Later</span>
-          </div>
-          <h1 className="mt-3 font-editorial text-4xl font-normal italic tracking-tight text-white sm:text-5xl">My Wishlist</h1>
-          <p className="mt-2 text-sm text-white/55">{totalElements} item{totalElements !== 1 ? 's' : ''} saved</p>
-        </div>
-      </section>
+      <PageHeader
+        icon={Heart}
+        eyebrow="Saved For Later"
+        title="My Wishlist"
+        subtitle={`${totalElements} item${totalElements !== 1 ? 's' : ''} saved`}
+        crumbs={[{ label: 'Wishlist' }]}
+      />
 
       <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
         {loading ? (
@@ -96,7 +91,7 @@ export default function WishlistPage() {
                       whileHover={{ y: -4 }}
                       transition={{ delay: Math.min(i * 0.03, 0.3), type: 'spring', stiffness: 260, damping: 22 }}
                     >
-                      <div className="group flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-card shadow-luxury transition-shadow duration-300 hover:shadow-luxury-lg">
+                      <div className="group flex h-full flex-col overflow-hidden rounded-lg border border-border/70 bg-card shadow-luxury transition-shadow duration-300 hover:shadow-luxury-lg">
                         <button onClick={() => navigate(`/shop/product/${product.slug}`)} className="relative aspect-square overflow-hidden bg-muted">
                           {image ? <SmartImage src={image} alt={product.name} className="transition-transform duration-500 group-hover:scale-110" fallbackIcon={<Package className="h-10 w-10" />} /> : <div className="flex h-full w-full items-center justify-center text-muted-foreground"><Package className="h-10 w-10" /></div>}
                           {discount > 0 && <Badge variant="destructive" className="absolute left-2 top-2">-{discount}%</Badge>}

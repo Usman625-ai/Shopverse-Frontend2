@@ -154,11 +154,23 @@ export default function CheckoutPage() {
   const shipping = discountedSubtotal > 5000 ? 0 : 200;
   const grandTotal = discountedSubtotal + shipping;
 
+  const steps = [{ label: 'Cart', done: true }, { label: 'Shipping & Payment', done: false }, { label: 'Confirmation', done: false }];
+
   return (
     <div className="space-y-6 pb-8">
       <div className="flex items-center gap-3">
         <button onClick={() => navigate('/shop/cart')} className="rounded-lg p-1 hover:bg-accent"><ArrowLeft className="h-5 w-5" /></button>
         <div><h1 className="font-editorial text-3xl font-normal tracking-tight">Checkout</h1><p className="text-sm text-muted-foreground">Complete your order</p></div>
+      </div>
+
+      {/* Step indicator */}
+      <div className="flex items-center rounded-lg border border-border bg-secondary/30 p-1">
+        {steps.map((s, i) => (
+          <div key={s.label} className={cn('flex flex-1 items-center justify-center gap-2 rounded-md py-2 text-xs font-medium sm:text-sm', i === 1 ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}>
+            <span className={cn('flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px]', i === 1 ? 'border-primary-foreground/40' : s.done ? 'border-primary text-primary' : 'border-current')}>{s.done && i !== 1 ? <Check className="h-3 w-3" /> : i + 1}</span>
+            <span className="hidden sm:inline">{s.label}</span>
+          </div>
+        ))}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -218,7 +230,7 @@ export default function CheckoutPage() {
         </div>
 
         <div>
-          <Card className="sticky top-24">
+          <Card className="sticky top-20 md:top-28 lg:top-36">
             <CardHeader><CardTitle>Order Summary</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <div className="max-h-48 space-y-2 overflow-y-auto scrollbar-thin">

@@ -9,6 +9,7 @@ import { Button, Card, CardContent, CardHeader, CardTitle, Input, Field, Modal, 
 import { useAppDispatch, useAppSelector } from '../../store';
 import { setUser } from '../../store/authSlice';
 import EmptyState from '../../components/shop/EmptyState';
+import PageHeader from '../../components/shop/PageHeader';
 
 export default function ProfilePage() {
   const dispatch = useAppDispatch();
@@ -133,8 +134,9 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="space-y-6 pb-8">
-      <h1 className="font-editorial text-3xl font-normal tracking-tight">My Profile</h1>
+    <div className="pb-10">
+      <PageHeader icon={User} eyebrow="Account" title="My Profile" subtitle="Manage your personal information and saved addresses" crumbs={[{ label: 'Profile' }]} />
+      <div className="mx-auto max-w-7xl space-y-6 px-4 pt-8 sm:px-6 lg:px-8">
 
       {/* Profile Header */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
@@ -204,6 +206,7 @@ export default function ProfilePage() {
             )}
           </CardContent>
         </Card>
+      </div>
       </div>
 
       {/* Password Modal */}

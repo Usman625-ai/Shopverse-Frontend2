@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchCart, updateCartItem, removeFromCart } from '../../store/cartSlice';
 import EmptyState from '../../components/shop/EmptyState';
 import CouponSelector, { type AppliedCoupon } from '../../components/shop/CouponSelector';
+import PageHeader from '../../components/shop/PageHeader';
 
 const FREE_SHIPPING_THRESHOLD = 5000;
 
@@ -82,27 +83,14 @@ export default function CartPage() {
 
   return (
     <div className="pb-10">
-      {/* Editorial header band */}
-      <section className="relative overflow-hidden border-b border-border/60 bg-gradient-to-br from-[#1a1410] via-[#15110d] to-[#0d0a07]">
-        <div className="pointer-events-none absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#d4a857 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
-        <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
-        <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <ShoppingBag className="h-3.5 w-3.5 text-primary-300" />
-                <span className="text-xs font-semibold uppercase tracking-[0.22em] text-primary-300">Your Selections</span>
-              </div>
-              <h1 className="mt-3 font-editorial text-4xl font-normal italic tracking-tight text-white sm:text-5xl">Shopping Cart</h1>
-              <p className="mt-2 text-sm text-white/55">{localCart.items.length} item{localCart.items.length !== 1 ? 's' : ''} reserved for you</p>
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-sm text-white/45">Subtotal</span>
-              <span className="font-editorial text-3xl font-medium text-primary-300">{formatPrice(localCart.subtotal)}</span>
-            </div>
-          </div>
-        </div>
-      </section>
+      <PageHeader
+        icon={ShoppingBag}
+        eyebrow="Your Selections"
+        title="Shopping Cart"
+        subtitle={`${localCart.items.length} item${localCart.items.length !== 1 ? 's' : ''} reserved for you`}
+        crumbs={[{ label: 'Cart' }]}
+        right={<div className="flex items-baseline gap-2"><span className="text-sm text-muted-foreground">Subtotal</span><span className="font-editorial text-3xl font-medium text-primary">{formatPrice(localCart.subtotal)}</span></div>}
+      />
 
       <div className="mx-auto max-w-7xl space-y-7 px-4 pt-8 sm:px-6 lg:px-8">
 
@@ -167,7 +155,7 @@ export default function CartPage() {
 
         {/* Receipt-style order summary */}
         <div>
-          <div className="sticky top-24 overflow-hidden rounded-xl border border-border/70 bg-card shadow-luxury">
+          <div className="sticky top-20 md:top-28 lg:top-36 overflow-hidden rounded-lg border border-border/70 bg-card shadow-luxury">
             <div className="border-b border-dashed border-border p-5">
               <h2 className="font-editorial text-xl font-medium">Order Summary</h2>
             </div>

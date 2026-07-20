@@ -335,7 +335,7 @@ export default function ProductDetailPage() {
             <h2 className="mt-1.5 font-editorial text-2xl font-normal tracking-tight">You May Also Like</h2>
           </div>
           {relatedLoading ? (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">{Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}</div>
+            <div className="grid grid-cols-np2 gap-4 sm:grid-cols-3 lg:grid-cols-6">{Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}</div>
           ) : (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
               {relatedProducts.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}

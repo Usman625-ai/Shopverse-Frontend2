@@ -9,6 +9,7 @@ import { cn, formatDateTime } from '../../lib/utils';
 import { Button, Card, CardContent, Skeleton, Badge } from '../../components/ui';
 import EmptyState from '../../components/shop/EmptyState';
 import Pagination from '../../components/shop/Pagination';
+import PageHeader from '../../components/shop/PageHeader';
 
 const typeConfig: Record<NotificationType, { icon: typeof Bell; color: string; bg: string; label: string }> = {
   ORDER_PLACED: { icon: ShoppingBag, color: 'text-primary', bg: 'bg-primary/10', label: 'Order' },
@@ -82,15 +83,17 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="space-y-6 pb-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-editorial text-3xl font-normal tracking-tight">Notifications</h1>
-          <p className="text-sm text-muted-foreground">{unreadCount > 0 ? `${unreadCount} unread notification${unreadCount !== 1 ? 's' : ''}` : 'You\'re all caught up!'}</p>
-        </div>
-        {unreadCount > 0 && <Button variant="outline" onClick={markAllRead} loading={marking}><CheckCheck className="h-4 w-4" /> Mark All Read</Button>}
-      </div>
+    <div className="pb-10">
+      <PageHeader
+        icon={Bell}
+        eyebrow="Updates"
+        title="Notifications"
+        subtitle={unreadCount > 0 ? `${unreadCount} unread notification${unreadCount !== 1 ? 's' : ''}` : "You're all caught up!"}
+        crumbs={[{ label: 'Notifications' }]}
+        right={unreadCount > 0 ? <Button variant="outline" onClick={markAllRead} loading={marking}><CheckCheck className="h-4 w-4" /> Mark All Read</Button> : undefined}
+      />
 
+      <div className="mx-auto max-w-7xl space-y-6 px-4 pt-8 sm:px-6 lg:px-8">
       <div className="space-y-3">
         <AnimatePresence>
           {notifications.map((notif) => {
@@ -123,6 +126,7 @@ export default function NotificationsPage() {
       </div>
 
       {totalPages > 1 && <Pagination currentPage={page + 1} totalPages={totalPages} onPageChange={(p) => setPage(p - 1)} />}
+      </div>
     </div>
   );
 }

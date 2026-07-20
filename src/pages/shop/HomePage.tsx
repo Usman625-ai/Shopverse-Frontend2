@@ -57,44 +57,72 @@ export default function HomePage() {
 
   return (
     <div className="space-y-16 pb-16 pt-6">
-      {/* Hero Carousel */}
+      {/* Hero — bento split: carousel + stacked collection tiles */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="relative overflow-hidden rounded-2xl">
-          <div className={`relative h-80 sm:h-96 md:h-[28rem] bg-gradient-to-br ${slides[currentSlide].bg}`}>
-            <div className="pointer-events-none absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '22px 22px' }} />
-            <AnimatePresence mode="wait">
+        <div className="grid gap-4 lg:grid-cols-3">
+          <div className="relative overflow-hidden rounded-lg lg:col-span-2">
+            <div className={`relative h-80 sm:h-96 lg:h-[30rem] bg-gradient-to-br ${slides[currentSlide].bg}`}>
+              <div className="pointer-events-none absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '22px 22px' }} />
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentSlide}
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -14 }}
+                  transition={{ duration: 0.5, ease: 'easeOut' }}
+                  className="relative flex h-full flex-col items-start justify-end px-7 pb-10 text-left text-white sm:px-10 sm:pb-12"
+                >
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary-300">{slides[currentSlide].eyebrow}</span>
+                  <h1 className="mt-4 font-editorial text-4xl font-normal italic tracking-tight sm:text-5xl">{slides[currentSlide].title}</h1>
+                  <p className="mt-4 max-w-md text-base text-white/70">{slides[currentSlide].subtitle}</p>
+                  <Link to="/shop/products">
+                    <Button size="lg" variant="default" className="mt-7 bg-white text-[#1a1510] hover:bg-white/90">
+                      {slides[currentSlide].cta} <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                </motion.div>
+              </AnimatePresence>
+              <button onClick={prevSlide} className="absolute left-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white backdrop-blur transition-colors hover:bg-white/15" aria-label="Previous slide"><ChevronLeft className="h-5 w-5" /></button>
+              <button onClick={nextSlide} className="absolute right-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white backdrop-blur transition-colors hover:bg-white/15" aria-label="Next slide"><ChevronRight className="h-5 w-5" /></button>
+              <div className="absolute right-7 top-7 flex gap-2 sm:right-10 sm:top-8">
+                {slides.map((_, i) => (
+                  <button key={i} onClick={() => setCurrentSlide(i)} className={`h-1.5 rounded-full transition-all duration-300 ${i === currentSlide ? 'w-7 bg-primary-300' : 'w-1.5 bg-white/30'}`} aria-label={`Go to slide ${i + 1}`} />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Stacked collection tiles */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-1">
+            {[
+              { title: 'New Arrivals', sub: 'Fresh drops weekly', href: '/shop/products?sortBy=createdAt,DESC', tone: 'from-[#241812] to-[#0f0b08]' },
+              { title: 'Top Rated', sub: 'Loved by customers', href: '/shop/products?sortBy=averageRating,DESC', tone: 'from-[#1a1f1a] to-[#0b0d0a]' },
+              { title: 'Best Value', sub: 'Great deals, low prices', href: '/shop/products?sortBy=price,ASC', tone: 'from-[#20140f] to-[#0d0908]' },
+            ].map((b, i) => (
               <motion.div
-                key={currentSlide}
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -14 }}
-                transition={{ duration: 0.5, ease: 'easeOut' }}
-                className="relative flex h-full flex-col items-center justify-center px-6 text-center text-white"
+                key={b.title}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.4 }}
+                whileHover={{ scale: 1.02 }}
+                transition={{ delay: i * 0.08, duration: 0.4 }}
+                className="h-full"
               >
-                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary-300">{slides[currentSlide].eyebrow}</span>
-                <h1 className="mt-4 font-editorial text-4xl font-normal italic tracking-tight sm:text-5xl md:text-6xl">{slides[currentSlide].title}</h1>
-                <p className="mt-4 max-w-xl text-base text-white/70 sm:text-lg">{slides[currentSlide].subtitle}</p>
-                <Link to="/shop/products">
-                  <Button size="lg" variant="default" className="mt-8 bg-white text-[#1a1510] hover:bg-white/90">
-                    {slides[currentSlide].cta} <ArrowRight className="h-4 w-4" />
-                  </Button>
+                <Link to={b.href} className={`group relative flex h-full min-h-[9rem] flex-col justify-end overflow-hidden rounded-lg bg-gradient-to-br ${b.tone} p-5 text-white`}>
+                  <div className="pointer-events-none absolute inset-0 opacity-[0.06] transition-opacity group-hover:opacity-[0.1]" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '18px 18px' }} />
+                  <p className="font-editorial text-xl italic">{b.title}</p>
+                  <p className="text-sm text-white/60">{b.sub}</p>
+                  <ArrowRight className="absolute right-5 top-5 h-4 w-4 text-white/50 transition-transform group-hover:translate-x-1" />
                 </Link>
               </motion.div>
-            </AnimatePresence>
-            <button onClick={prevSlide} className="absolute left-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white backdrop-blur transition-colors hover:bg-white/15" aria-label="Previous slide"><ChevronLeft className="h-5 w-5" /></button>
-            <button onClick={nextSlide} className="absolute right-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white backdrop-blur transition-colors hover:bg-white/15" aria-label="Next slide"><ChevronRight className="h-5 w-5" /></button>
-            <div className="absolute bottom-5 left-1/2 flex -translate-x-1/2 gap-2">
-              {slides.map((_, i) => (
-                <button key={i} onClick={() => setCurrentSlide(i)} className={`h-1.5 rounded-full transition-all duration-300 ${i === currentSlide ? 'w-7 bg-primary-300' : 'w-1.5 bg-white/30'}`} aria-label={`Go to slide ${i + 1}`} />
-              ))}
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Features */}
+      {/* Features — bordered strip */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-2 divide-y divide-border rounded-lg border border-border sm:divide-y-0 sm:divide-x md:grid-cols-4">
           {features.map((f, i) => {
             const I = f.icon;
             return (
@@ -103,43 +131,14 @@ export default function HomePage() {
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.5 }}
-                whileHover={{ y: -3 }}
                 transition={{ delay: i * 0.06, duration: 0.4 }}
+                className="flex items-center gap-3 p-5"
               >
-                <Card className="flex items-center gap-3 p-4 transition-shadow duration-300 hover:shadow-luxury">
-                  <motion.div whileHover={{ rotate: 8, scale: 1.08 }} transition={{ type: 'spring', stiffness: 300 }} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-primary/15 bg-primary/5 text-primary"><I className="h-[18px] w-[18px]" strokeWidth={1.75} /></motion.div>
-                  <div><p className="text-sm font-medium">{f.title}</p><p className="text-xs text-muted-foreground">{f.desc}</p></div>
-                </Card>
+                <motion.div whileHover={{ rotate: 8, scale: 1.08 }} transition={{ type: 'spring', stiffness: 300 }} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-primary/15 bg-primary/5 text-primary"><I className="h-[18px] w-[18px]" strokeWidth={1.75} /></motion.div>
+                <div><p className="text-sm font-medium">{f.title}</p><p className="text-xs text-muted-foreground">{f.desc}</p></div>
               </motion.div>
             );
           })}
-        </div>
-      </section>
-
-      {/* Collection banners */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-4 sm:grid-cols-3">
-          {[
-            { title: 'New Arrivals', sub: 'Fresh drops weekly', href: '/shop/products?sortBy=createdAt,DESC', tone: 'from-[#241812] to-[#0f0b08]' },
-            { title: 'Top Rated', sub: 'Loved by customers', href: '/shop/products?sortBy=averageRating,DESC', tone: 'from-[#1a1f1a] to-[#0b0d0a]' },
-            { title: 'Best Value', sub: 'Great deals, low prices', href: '/shop/products?sortBy=price,ASC', tone: 'from-[#20140f] to-[#0d0908]' },
-          ].map((b, i) => (
-            <motion.div
-              key={b.title}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.4 }}
-              whileHover={{ scale: 1.02 }}
-              transition={{ delay: i * 0.08, duration: 0.4 }}
-            >
-              <Link to={b.href} className={`group relative flex h-32 flex-col justify-end overflow-hidden rounded-xl bg-gradient-to-br ${b.tone} p-5 text-white`}>
-                <div className="pointer-events-none absolute inset-0 opacity-[0.06] transition-opacity group-hover:opacity-[0.1]" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '18px 18px' }} />
-                <p className="font-editorial text-xl italic">{b.title}</p>
-                <p className="text-sm text-white/60">{b.sub}</p>
-                <ArrowRight className="absolute right-5 top-5 h-4 w-4 text-white/50 transition-transform group-hover:translate-x-1" />
-              </Link>
-            </motion.div>
-          ))}
         </div>
       </section>
 
@@ -168,7 +167,7 @@ export default function HomePage() {
                 transition={{ delay: Math.min(i * 0.04, 0.3), duration: 0.4 }}
               >
                 <Link to={`/shop/products?categoryId=${cat.id}`} className="group block">
-                  <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-secondary/40 via-secondary/20 to-transparent">
+                  <div className="relative aspect-[4/5] overflow-hidden rounded-lg border border-border/60 bg-gradient-to-br from-secondary/40 via-secondary/20 to-transparent">
                     {cat.imageUrl ? (
                       <SmartImage src={cat.imageUrl} alt={cat.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" fallbackIcon={<Package className="h-10 w-10 text-primary/40" />} />
                     ) : (
@@ -216,7 +215,7 @@ export default function HomePage() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.4 }}
           transition={{ duration: 0.5 }}
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#241812] via-[#1a120d] to-[#0f0b08] px-6 py-12 text-center text-white sm:px-16"
+          className="relative overflow-hidden rounded-lg bg-gradient-to-br from-[#241812] via-[#1a120d] to-[#0f0b08] px-6 py-12 text-center text-white sm:px-16"
         >
           <div className="pointer-events-none absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
           <div className="relative">
