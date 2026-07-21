@@ -85,7 +85,7 @@ export default function ProductCard({ product, layout = 'grid', index = 0 }: Pro
         <Link to={`/shop/product/${product.slug}`} className="block">
           <div className="group flex gap-3 rounded-xl border border-border/70 bg-card p-3 shadow-luxury transition-all duration-300 hover:shadow-luxury-lg">
             <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg sm:h-28 sm:w-28">
-              <SmartImage src={image} alt={product.name} className="rounded-lg transition-transform duration-500 group-hover:scale-110" fallbackIcon={<Package className="h-8 w-8" />} />
+              <SmartImage src={image} alt={product.name} width={200} className="rounded-lg transition-transform duration-500 group-hover:scale-110" fallbackIcon={<Package className="h-8 w-8" />} />
               {discount > 0 && <Badge variant="destructive" className="absolute left-1 top-1 px-1.5 py-0 text-[0.6rem]">-{discount}%</Badge>}
             </div>
             <div className="flex flex-1 flex-col">
@@ -129,7 +129,7 @@ export default function ProductCard({ product, layout = 'grid', index = 0 }: Pro
         <Link to={`/shop/product/${product.slug}`} className="block h-full">
           <div className="relative flex h-full flex-col overflow-hidden rounded-xl border border-border/60 bg-card transition-all duration-300 hover:border-primary/30 hover:shadow-luxury-lg">
             <div className="relative aspect-square overflow-hidden">
-              <SmartImage src={image} alt={product.name} className="transition-transform duration-700 group-hover:scale-110" fallbackIcon={<Package className="h-8 w-8" />} />
+              <SmartImage src={image} alt={product.name} width={400} className="transition-transform duration-700 group-hover:scale-110" fallbackIcon={<Package className="h-8 w-8" />} />
               <div className="absolute left-1.5 top-1.5 flex flex-col gap-1">
                 {discount > 0 && <Badge variant="destructive" className="px-1.5 py-0 text-[0.6rem] shadow-sm">-{discount}%</Badge>}
                 {product.featured && <Badge variant="default" className="px-1.5 py-0 text-[0.6rem] shadow-sm">Featured</Badge>}

@@ -119,7 +119,7 @@ export default function CartPage() {
                   <motion.div key={item.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }} className="flex gap-4 py-5">
                     <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-muted sm:h-28 sm:w-28">
                       {item.productImage
-                        ? <SmartImage src={item.productImage} alt={item.productName} className="rounded-lg" fallbackIcon={<Package className="h-8 w-8" />} />
+                        ? <SmartImage src={item.productImage} alt={item.productName} width={150} className="rounded-lg" fallbackIcon={<Package className="h-8 w-8" />} />
                         : <div className="flex h-full w-full items-center justify-center text-muted-foreground"><Package className="h-8 w-8" /></div>}
                     </div>
                     <div className="flex flex-1 flex-col">

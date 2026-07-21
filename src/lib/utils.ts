@@ -67,6 +67,18 @@ export function getProductImages(product?: { images?: Array<string | { url?: str
     return img.imageUrl || img.url || '';
   }).filter(Boolean);
 }
+
+/**
+ * Cloudinary lets you request a resized/optimized variant just by inserting
+ * a transform segment into the existing URL — no re-upload needed. We
+ * always uploaded originals at up to 1200px, so a 96px cart thumbnail was
+ * downloading the same bytes as the full product-detail hero image.
+ * Non-Cloudinary URLs (fallback/local/dev images) are returned unchanged.
+ */
+export function cloudinaryResize(url: string, width: number): string {
+  if (!url || !url.includes('res.cloudinary.com') || !url.includes('/upload/')) return url;
+  return url.replace('/upload/', `/upload/w_${width},q_auto,f_auto,c_limit/`);
+}
 export const storage = {
   get: (key: string) => { try { const item = localStorage.getItem(key); return item ? JSON.parse(item) : null; } catch { return null; } },
   set: (key: string, value: unknown) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} },

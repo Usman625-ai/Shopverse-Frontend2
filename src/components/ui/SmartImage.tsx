@@ -1,12 +1,17 @@
 import { useState, type ImgHTMLAttributes } from 'react';
 import { Package } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import { cn, cloudinaryResize } from '../../lib/utils';
 
 interface SmartImageProps extends ImgHTMLAttributes<HTMLImageElement> {
   src?: string;
   alt: string;
   fallbackIcon?: React.ReactNode;
   aspect?: 'square' | 'video' | 'auto';
+  /** Requested render width in px — used to fetch a right-sized Cloudinary
+   * variant instead of always downloading the full-size original. Pick the
+   * largest size this image will actually render at (e.g. 300 for a grid
+   * card, 800 for a product-detail hero). */
+  width?: number;
 }
 
 export default function SmartImage({
@@ -15,6 +20,7 @@ export default function SmartImage({
   className,
   fallbackIcon,
   aspect = 'square',
+  width,
   ...rest
 }: SmartImageProps) {
   const [errored, setErrored] = useState(false);
@@ -22,12 +28,13 @@ export default function SmartImage({
 
   const showFallback = !src || errored;
   const aspectClass = aspect === 'square' ? 'aspect-square' : aspect === 'video' ? 'aspect-video' : '';
+  const resolvedSrc = src && width ? cloudinaryResize(src, width) : src;
 
   return (
     <div className={cn('relative overflow-hidden bg-muted', aspectClass, className)}>
       {!showFallback && (
         <img
-          src={src}
+          src={resolvedSrc}
           alt={alt}
           loading="lazy"
           decoding="async"

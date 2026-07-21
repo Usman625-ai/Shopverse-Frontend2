@@ -179,7 +179,7 @@ export default function ProductDetailPage() {
         <div className="space-y-4">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative aspect-square overflow-hidden rounded-xl border border-border">
             {images[activeImage] ? (
-              <SmartImage src={images[activeImage]} alt={product.name} className="rounded-xl" fallbackIcon={<Package className="h-16 w-16" />} />
+              <SmartImage src={images[activeImage]} alt={product.name} width={800} className="rounded-xl" fallbackIcon={<Package className="h-16 w-16" />} />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-muted-foreground"><Package className="h-16 w-16" /></div>
             )}
@@ -189,7 +189,7 @@ export default function ProductDetailPage() {
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
               {images.map((img, i) => (
                 <button key={i} onClick={() => setActiveImage(i)} className={cn('h-20 w-20 shrink-0 overflow-hidden rounded-lg border-2 transition-all', i === activeImage ? 'border-primary' : 'border-border hover:border-primary/50')}>
-                  <SmartImage src={img} alt={`${product.name} ${i + 1}`} className="rounded-lg" fallbackIcon={<Package className="h-6 w-6" />} />
+                  <SmartImage src={img} alt={`${product.name} ${i + 1}`} width={80} className="rounded-lg" fallbackIcon={<Package className="h-6 w-6" />} />
                 </button>
               ))}
             </div>
