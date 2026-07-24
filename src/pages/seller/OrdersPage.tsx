@@ -147,7 +147,7 @@ export default function OrdersPage() {
       </Card>
 
       {!loading && totalPages > 1 && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">Page {page + 1} of {totalPages}</p>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" disabled={page === 0} onClick={() => fetchOrders(page - 1)}>Previous</Button>

@@ -120,7 +120,7 @@ export default function ProductDetailPage() {
   if (loading) {
     return (
       <div className="space-y-6 pb-8">
-        <div className="grid gap-8 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
           <Skeleton className="h-96 w-full rounded-xl" />
           <div className="space-y-4"><Skeleton className="h-8 w-3/4" /><Skeleton className="h-6 w-1/2" /><Skeleton className="h-24 w-full" /><Skeleton className="h-12 w-full" /></div>
         </div>
@@ -148,22 +148,22 @@ export default function ProductDetailPage() {
           <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-white/55 transition-colors hover:text-white"><ChevronLeft className="h-4 w-4" /> Back to collection</button>
           <div className="mt-5 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="outline" className="border-white/15 bg-white/5 text-white/80">{product.categoryName || product.category?.name || 'Uncategorized'}</Badge>
                 {product.featured && <Badge variant="default">Featured</Badge>}
               </div>
-              <h1 className="mt-3 font-editorial text-4xl font-normal italic tracking-tight text-white sm:text-5xl">{product.name}</h1>
+              <h1 className="mt-3 font-editorial text-3xl font-normal italic tracking-tight text-white sm:text-4xl lg:text-5xl">{product.name}</h1>
               <p className="mt-2 text-sm text-white/55">{product.brand || 'Generic'} · SKU: {product.sku || 'N/A'}</p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               <div className="flex items-center gap-2">
                 <StarRating rating={product.averageRating || 0} size={18} />
                 <span className="text-sm font-medium text-white">{product.averageRating?.toFixed(1) || '0.0'}</span>
                 <span className="text-sm text-white/45">({product.totalReviews || 0})</span>
               </div>
-              <div className="h-8 w-px bg-white/15" />
+              <div className="hidden h-8 w-px bg-white/15 md:block" />
               <div className="flex items-baseline gap-2">
-                <span className="font-editorial text-3xl font-medium text-primary-300">{formatPrice(effectivePrice)}</span>
+                <span className="font-editorial text-2xl font-medium text-primary-300 sm:text-3xl">{formatPrice(effectivePrice)}</span>
                 {discount > 0 && <span className="text-base text-white/40 line-through">{formatPrice(product.price)}</span>}
               </div>
             </div>
@@ -174,7 +174,7 @@ export default function ProductDetailPage() {
       <div className="mx-auto max-w-7xl space-y-8 px-4 pt-8 sm:px-6 lg:px-8">
 
       {/* Product Main */}
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
         {/* Gallery */}
         <div className="space-y-4">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative aspect-square overflow-hidden rounded-xl border border-border">
@@ -188,7 +188,7 @@ export default function ProductDetailPage() {
           {images.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
               {images.map((img, i) => (
-                <button key={i} onClick={() => setActiveImage(i)} className={cn('h-20 w-20 shrink-0 overflow-hidden rounded-lg border-2 transition-all', i === activeImage ? 'border-primary' : 'border-border hover:border-primary/50')}>
+                <button key={i} onClick={() => setActiveImage(i)} className={cn('h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-all sm:h-20 sm:w-20', i === activeImage ? 'border-primary' : 'border-border hover:border-primary/50')}>
                   <SmartImage src={img} alt={`${product.name} ${i + 1}`} width={80} className="rounded-lg" fallbackIcon={<Package className="h-6 w-6" />} />
                 </button>
               ))}
@@ -199,22 +199,22 @@ export default function ProductDetailPage() {
         {/* Info */}
         <div className="space-y-4">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Badge variant="outline">{product.categoryName || product.category?.name || 'Uncategorized'}</Badge>
               {product.featured && <Badge variant="default">Featured</Badge>}
             </div>
-            <h1 className="mt-2 font-editorial text-3xl font-normal tracking-tight sm:text-3xl">{product.name}</h1>
+            <h1 className="mt-2 font-editorial text-2xl font-normal tracking-tight sm:text-3xl">{product.name}</h1>
             <p className="text-sm text-muted-foreground">{product.brand || 'Generic'} · SKU: {product.sku || 'N/A'}</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <div className="flex items-center gap-1">
               <StarRating rating={product.averageRating || 0} size={18} />
               <span className="text-sm font-medium">{product.averageRating?.toFixed(1) || '0.0'}</span>
             </div>
             <span className="text-sm text-muted-foreground">{product.totalReviews || 0} reviews</span>
           </div>
-          <div className="flex items-baseline gap-3">
-            <span className="text-3xl font-editorial font-medium text-primary">{formatPrice(effectivePrice)}</span>
+          <div className="flex flex-wrap items-baseline gap-3">
+            <span className="text-2xl font-editorial font-medium text-primary sm:text-3xl">{formatPrice(effectivePrice)}</span>
             {discount > 0 && <span className="text-lg text-muted-foreground line-through">{formatPrice(product.price)}</span>}
             {discount > 0 && <Badge variant="success">Save {formatPrice(product.price - effectivePrice)}</Badge>}
           </div>
@@ -223,22 +223,22 @@ export default function ProductDetailPage() {
             {outOfStock ? <Badge variant="destructive">Out of Stock</Badge> : <Badge variant="success">In Stock ({product.stockQuantity} available)</Badge>}
           </div>
 
-          {/* Quantity + Actions */}
-          <div className="flex items-center gap-3">
+          {/* Quantity + Actions — wraps on mobile, single row on sm+ */}
+          <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center rounded-lg border border-border">
               <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="flex h-10 w-10 items-center justify-center hover:bg-accent rounded-l-lg" disabled={outOfStock}><Minus className="h-4 w-4" /></button>
               <span className="w-12 text-center text-sm font-medium">{quantity}</span>
               <button onClick={() => setQuantity((q) => Math.min(product.stockQuantity, q + 1))} className="flex h-10 w-10 items-center justify-center hover:bg-accent rounded-r-lg" disabled={outOfStock}><Plus className="h-4 w-4" /></button>
             </div>
-            <Button size="lg" onClick={handleAddToCart} disabled={outOfStock} className="flex-1"><ShoppingCart className="h-5 w-5" /> Add to Cart</Button>
-            <Button size="lg" variant="outline" onClick={handleWishlist}><Heart className={cn('h-5 w-5', wished && 'fill-destructive text-destructive')} /></Button>
+            <Button size="lg" onClick={handleAddToCart} disabled={outOfStock} className="order-3 w-full sm:order-2 sm:w-auto sm:flex-1"><ShoppingCart className="h-5 w-5" /> Add to Cart</Button>
+            <Button size="lg" variant="outline" onClick={handleWishlist} className="order-2 sm:order-3 sm:w-auto"><Heart className={cn('h-5 w-5', wished && 'fill-destructive text-destructive')} /></Button>
           </div>
 
           {/* Trust badges */}
-          <div className="grid grid-cols-3 gap-3 pt-2">
+          <div className="grid grid-cols-3 gap-2 pt-2 sm:gap-3">
             {[{ icon: Truck, t: 'Fast Delivery' }, { icon: Shield, t: 'Secure Payment' }, { icon: RotateCcw, t: 'Easy Returns' }].map((f) => { const I = f.icon; return (
-              <div key={f.t} className="flex flex-col items-center gap-1 rounded-lg border border-border p-3 text-center">
-                <I className="h-5 w-5 text-primary" /><span className="text-xs text-muted-foreground">{f.t}</span>
+              <div key={f.t} className="flex flex-col items-center gap-1 rounded-lg border border-border p-2 text-center sm:p-3">
+                <I className="h-4 w-4 text-primary sm:h-5 sm:w-5" /><span className="text-[0.7rem] text-muted-foreground sm:text-xs">{f.t}</span>
               </div>
             ); })}
           </div>
@@ -269,8 +269,8 @@ export default function ProductDetailPage() {
 
       {/* Reviews */}
       <div>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-editorial text-2xl font-normal tracking-tight">Customer Reviews ({product.totalReviews || 0})</h2>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="font-editorial text-xl font-normal tracking-tight sm:text-2xl">Customer Reviews ({product.totalReviews || 0})</h2>
           {isAuthenticated && user?.role === 'CUSTOMER' && (
             <Button variant="outline" onClick={() => setShowReviewForm((s) => !s)}><MessageSquare className="h-4 w-4" /> {showReviewForm ? 'Cancel' : 'Write a Review'}</Button>
           )}
@@ -317,7 +317,7 @@ export default function ProductDetailPage() {
               </motion.div>
             ))}
             {totalReviewPages > 1 && (
-              <div className="flex justify-center gap-2 pt-2">
+              <div className="flex flex-wrap justify-center gap-2 pt-2">
                 <Button variant="outline" size="sm" disabled={reviewPage === 0} onClick={() => setReviewPage((p) => p - 1)}>Previous</Button>
                 <span className="flex items-center px-3 text-sm text-muted-foreground">Page {reviewPage + 1} of {totalReviewPages}</span>
                 <Button variant="outline" size="sm" disabled={reviewPage >= totalReviewPages - 1} onClick={() => setReviewPage((p) => p + 1)}>Next</Button>
@@ -335,9 +335,9 @@ export default function ProductDetailPage() {
             <h2 className="mt-1.5 font-editorial text-2xl font-normal tracking-tight">You May Also Like</h2>
           </div>
           {relatedLoading ? (
-            <div className="grid grid-cols-np2 gap-4 sm:grid-cols-3 lg:grid-cols-6">{Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}</div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">{Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}</div>
           ) : (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
               {relatedProducts.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
             </div>
           )}
@@ -347,3 +347,4 @@ export default function ProductDetailPage() {
     </div>
   );
 }
+

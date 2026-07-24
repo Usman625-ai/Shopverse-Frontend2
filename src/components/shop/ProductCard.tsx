@@ -139,7 +139,7 @@ export default function ProductCard({ product, layout = 'grid', index = 0 }: Pro
                   <Badge variant="secondary" className="text-[0.65rem]">Out of Stock</Badge>
                 </div>
               )}
-              <div className="absolute right-1.5 top-1.5 flex flex-col gap-1 opacity-0 transition-all duration-300 group-hover:opacity-100">
+              <div className="absolute right-1.5 top-1.5 flex flex-col gap-1 sm:opacity-0 sm:transition-all sm:duration-300 sm:group-hover:opacity-100">
                 <button onClick={handleWishlist} className="flex h-7 w-7 items-center justify-center rounded-full bg-background/90 text-foreground shadow-sm backdrop-blur transition-colors hover:bg-background hover:text-primary" title="Add to wishlist"><Heart className="h-3.5 w-3.5" /></button>
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-background/90 text-foreground shadow-sm backdrop-blur"><Eye className="h-3.5 w-3.5" /></span>
               </div>
@@ -168,3 +168,4 @@ export default function ProductCard({ product, layout = 'grid', index = 0 }: Pro
     </motion.div>
   );
 }
+

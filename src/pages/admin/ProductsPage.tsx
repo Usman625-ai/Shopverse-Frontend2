@@ -161,7 +161,7 @@ export default function ProductsPage() {
                 </TableBody>
               </Table>
 
-              <div className="flex items-center justify-between border-t border-border p-4">
+              <div className="flex flex-col gap-3 border-t border-border p-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-muted-foreground">{totalElements} product{totalElements !== 1 ? 's' : ''} total</p>
                 <div className="flex items-center gap-2">
                   <Button size="sm" variant="outline" disabled={page === 0} onClick={() => setPage((p) => p - 1)}><ChevronLeft className="h-4 w-4" /> Prev</Button>
@@ -226,3 +226,4 @@ function InfoRow({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+

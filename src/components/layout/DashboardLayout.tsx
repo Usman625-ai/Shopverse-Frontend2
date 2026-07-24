@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Moon, Sun, Menu, LogOut, ChevronDown } from 'lucide-react';
 import Sidebar from './Sidebar';
@@ -12,13 +12,15 @@ import { cn, getInitials } from '../../lib/utils';
 interface P { title?: string; subtitle?: string; }
 export default function DashboardLayout({ title, subtitle }: P) {
   const [sc, setSc] = useState(false); const [ms, setMs] = useState(false); const [um, setUm] = useState(false);
-  const dispatch = useAppDispatch(); const navigate = useNavigate();
+  const dispatch = useAppDispatch(); const navigate = useNavigate(); const loc = useLocation();
   const { user } = useAppSelector((s) => s.auth); const { theme } = useAppSelector((s) => s.ui);
   const handleLogout = async () => { await dispatch(logout()); navigate('/'); };
+  useEffect(() => { setMs(false); setUm(false); }, [loc.pathname]);
+  useEffect(() => { if (ms || um) { document.body.style.overflow = 'hidden'; } else { document.body.style.overflow = ''; } return () => { document.body.style.overflow = ''; }; }, [ms, um]);
 
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar collapsed={sc} onClose={ms ? () => setMs(false) : undefined} onToggleCollapse={() => setSc(!sc)} />
+      <Sidebar collapsed={sc} mobileOpen={ms} onClose={() => setMs(false)} onToggleCollapse={() => setSc(!sc)} />
       <div className={cn('flex flex-col transition-all duration-300', sc ? 'lg:pl-20' : 'lg:pl-64')}>
         <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border bg-background/85 px-4 backdrop-blur-md lg:px-7">
           <div className="flex items-center gap-4">
@@ -53,3 +55,5 @@ export default function DashboardLayout({ title, subtitle }: P) {
     </div>
   );
 }
+
+

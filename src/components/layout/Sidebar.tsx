@@ -5,7 +5,7 @@ import { useAppDispatch, useAppSelector } from '../../store';
 import { logout } from '../../store/authSlice';
 import { cn } from '../../lib/utils';
 
-interface P { collapsed: boolean; onClose?: () => void; onToggleCollapse?: () => void; }
+interface P { collapsed: boolean; mobileOpen?: boolean; onClose?: () => void; onToggleCollapse?: () => void; }
 
 interface NavGroup { label: string; items: { to: string; label: string; icon: typeof LayoutDashboard }[]; }
 
@@ -34,7 +34,7 @@ const sellerNav: NavGroup[] = [
   { label: 'System', items: [{ to: '/seller/settings', label: 'Shop Settings', icon: Settings }] },
 ];
 
-export default function Sidebar({ collapsed, onClose, onToggleCollapse }: P) {
+export default function Sidebar({ collapsed, mobileOpen, onClose, onToggleCollapse }: P) {
   const dispatch = useAppDispatch(); const navigate = useNavigate();
   const { user } = useAppSelector((s) => s.auth);
   const groups = user?.role === 'ADMIN' ? adminNav : sellerNav;
@@ -42,9 +42,9 @@ export default function Sidebar({ collapsed, onClose, onToggleCollapse }: P) {
   return (
     <>
       <AnimatePresence>
-        {onClose && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="fixed inset-0 z-30 bg-black/50 lg:hidden" />}
+        {mobileOpen && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="fixed inset-0 z-30 bg-black/50 lg:hidden" />}
       </AnimatePresence>
-      <aside className={cn('fixed left-0 top-0 z-40 flex h-screen flex-col bg-[#15110d] transition-all duration-300 border-r border-white/[0.06]', collapsed ? 'w-20' : 'w-64', onClose ? 'lg:translate-x-0' : 'translate-x-0')}>
+      <aside className={cn('fixed left-0 top-0 z-40 flex h-screen flex-col bg-[#15110d] transition-transform duration-300 border-r border-white/[0.06]', collapsed ? 'w-20' : 'w-64', mobileOpen ? 'translate-x-0' : '-translate-x-full', 'lg:translate-x-0')}>
         <div className="flex h-16 shrink-0 items-center justify-between px-4">
           <div className="flex items-center gap-2.5 overflow-hidden">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-primary-400 to-primary-600 font-editorial text-base font-semibold text-primary-foreground">S</div>
@@ -55,7 +55,7 @@ export default function Sidebar({ collapsed, onClose, onToggleCollapse }: P) {
               </div>
             )}
           </div>
-          {onClose && <button onClick={onClose} className="rounded-lg p-1 text-[#f0e9dd] hover:bg-white/5 lg:hidden"><X className="h-5 w-5" /></button>}
+          {mobileOpen && <button onClick={onClose} className="rounded-lg p-1 text-[#f0e9dd] hover:bg-white/5 lg:hidden"><X className="h-5 w-5" /></button>}
         </div>
 
         <nav className="flex-1 space-y-5 overflow-y-auto scrollbar-thin px-3 py-3">
@@ -98,4 +98,6 @@ export default function Sidebar({ collapsed, onClose, onToggleCollapse }: P) {
     </>
   );
 }
+
+
 

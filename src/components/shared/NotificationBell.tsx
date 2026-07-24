@@ -110,7 +110,7 @@ export default function NotificationBell({ basePath, variant = 'light', classNam
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 top-12 z-50 w-[22rem] max-w-[90vw] overflow-hidden rounded-lg border border-border/70 bg-card shadow-luxury-lg"
+            className="fixed left-3 right-3 top-[76px] z-50 sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-[22rem] sm:max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-lg border border-border/70 bg-card shadow-luxury-lg"
           >
             <div className="flex items-center justify-between border-b border-border/70 px-4 py-3">
               <p className="text-sm font-semibold">Notifications</p>
@@ -158,3 +158,4 @@ export default function NotificationBell({ basePath, variant = 'light', classNam
     </div>
   );
 }
+

@@ -99,7 +99,7 @@ export default function WishlistPage() {
                           <motion.button
                             onClick={(e) => { e.stopPropagation(); removeFromWishlist(product.id); }}
                             whileTap={{ scale: 0.85 }}
-                            className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-background/80 text-destructive opacity-0 backdrop-blur transition-opacity duration-200 group-hover:opacity-100"
+                            className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-background/80 text-destructive backdrop-blur transition-opacity duration-200 sm:opacity-0 sm:group-hover:opacity-100"
                             title="Remove"
                           >
                             <Heart className="h-3.5 w-3.5 fill-current" />
@@ -111,9 +111,9 @@ export default function WishlistPage() {
                           <div className="mt-auto flex items-end justify-between pt-2">
                             <div><span className="text-base font-semibold text-primary">{formatPrice(effPrice)}</span>{discount > 0 && <span className="ml-1 text-xs text-muted-foreground line-through">{formatPrice(product.price)}</span>}</div>
                           </div>
-                          <div className="mt-2 flex gap-2">
-                            <Button size="sm" className="flex-1" onClick={() => moveToCart(product)} disabled={outOfStock || isMoving} loading={isMoving}><ShoppingCart className="h-3.5 w-3.5" /> {isMoving ? 'Moving...' : 'Move to Cart'}</Button>
-                            <Button size="sm" variant="outline" onClick={() => removeFromWishlist(product.id)} title="Remove"><Trash2 className="h-3.5 w-3.5" /></Button>
+                          <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:gap-2">
+                            <Button size="sm" className="w-full sm:flex-1" onClick={() => moveToCart(product)} disabled={outOfStock || isMoving} loading={isMoving}><ShoppingCart className="h-3.5 w-3.5" /> <span className="truncate">{isMoving ? 'Moving...' : 'Move to Cart'}</span></Button>
+                            <Button size="sm" variant="outline" className="sm:hidden" onClick={() => removeFromWishlist(product.id)} title="Remove"><Trash2 className="h-3.5 w-3.5" /></Button>
                           </div>
                         </div>
                       </div>
